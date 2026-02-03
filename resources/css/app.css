@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+.letter {
+    display: inline-block;
+    will-change: transform;
+}
+@keyframes scaleIn {
+  from { transform: scale(.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-scale {
+  animation: scaleIn .2s ease-out;
+}
+.chip {
+    @apply bg-pink-100 text-pink-600 px-4 py-1 rounded-full text-sm hover:bg-pink-200 transition;
+}
+
+.product-card {
+    @apply bg-white p-3 rounded-xl shadow hover:shadow-lg transition cursor-pointer;
+}
