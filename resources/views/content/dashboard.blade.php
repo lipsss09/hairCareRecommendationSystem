@@ -8,7 +8,7 @@
 <section class="w-full relative">
     <div class="relative w-full h-[450px]">
         <video autoplay loop muted playsinline class="w-full h-full object-cover">
-            <source src="{{ asset('assets/images/4763619-hd_1920_1080_25fps.mp4') }}" type="video/mp4">
+            <source src="{{ asset('assets/images/vid.mp4') }}" type="video/mp4">
             Your browser does not support the video tag.
         </video>
 
