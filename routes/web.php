@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContentController;
 use App\Http\Controllers\Api\AuthApiController;
 Route::get('/', function () {
     return view('welcome');
@@ -20,6 +21,8 @@ Route::post('/logout', [AuthController::class, 'logout']);
 Route::get('/dashboard', function () {
     return view('content.dashboard');
 })->middleware('auth')->name('dashboard');
+
+Route::get('/permasalahan', [ContentController::class, 'hairProblem'])->name('permasalahan');
 
 
 

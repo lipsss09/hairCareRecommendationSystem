@@ -11,8 +11,8 @@
 
         <!-- MIDDLE: Menu -->
         <div class="hidden md:flex gap-8 text-gray-700 font-medium">
-            <a href="#" class="hover:text-pink-600">Beranda</a>
-            <a href="#" class="hover:text-pink-600">Permasalahan</a>
+            <a href="/dashboard" class="hover:text-pink-600">Beranda</a>
+            <a href="/permasalahan" class="hover:text-pink-600">Permasalahan</a>
             <a href="#" class="hover:text-pink-600">Rekomendasi</a>
             <a href="#" class="hover:text-pink-600">Tentang</a>
             <a href="#" class="hover:text-pink-600">Kontak</a>
