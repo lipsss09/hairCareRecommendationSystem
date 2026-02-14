@@ -1,4 +1,4 @@
-<nav class="bg-pink-200  px-6 py-3 shadow-md bg-gradient-to-r from-pink-200 to-pink-100">
+<nav class="bg-pink-200 px-6 py-3 bg-gradient-to-r from-pink-200 to-pink-100 relative shadow-[0_8px_30px_rgb(0,0,0,0.12)] border-b-2 border-pink-300">
 
     <div class="max-w-8xl mx-auto flex items-center justify-between">
 
@@ -36,7 +36,7 @@
             <!-- Avatar -->
             <div class="relative">
                 <button id="profileBtn" class="focus:outline-none">
-                    <img src="{{asset('assets/images/livi.png')}}"
+                    <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets/images/livi.png') }}"
                         class="w-9 h-9 rounded-full border-2 border-white shadow-md">
                 </button>
 
@@ -47,8 +47,9 @@
                     <!-- HEADER -->
                     <div class="flex items-center gap-3 bg-pink-100 p-3 rounded-xl">
 
-                        <img src="{{asset('assets/images/livi.png')}}" class="w-12 h-12 rounded-full border">
+                        <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets/images/livi.png') }}" class="w-12 h-12 rounded-full border">
                         <div class="flex-1">
+                            
                             <p class="font-semibold text-gray-700">{{ auth()->user()->username }}</p>
                             <p class="text-xs text-gray-500">User</p>
                         </div>
@@ -95,23 +96,24 @@
         <button id="closeModal"
             class="absolute top-3 right-4 text-gray-400 hover:text-red-500 text-xl">&times;</button>
 
-        <div class="flex flex-col items-center mb-4">
-            <img src="{{asset('assets/images/livi.png')}}"
-                class="w-20 h-20 rounded-full border mb-2">
-            <button class="bg-pink-100 text-pink-600 px-3 py-1 rounded-lg text-sm">Ubah Foto</button>
-        </div>
-
-        <form action="{{ route('profile.update') }}" method="POST" class="space-y-3">
+        <form action="{{ route('profile.update') }}" method="POST" class="space-y-3" enctype="multipart/form-data">
             @csrf
-           
+           <div class="flex flex-col items-center mb-4">
+            <img id="profilePreview" src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : asset('assets/images/livi.png') }}"
+                class="w-20 h-20 rounded-full border mb-2 object-cover">
+            <label for="profile_picture" class="bg-pink-100 text-pink-600 px-3 py-1 rounded-lg text-sm cursor-pointer hover:bg-pink-200 transition">Ubah Foto
+                <input type="file" class="hidden" name="profile_picture" id="profile_picture" accept="image/*">
+            </label>
+        </div>
             <input type="text" value="{{ auth()->user()->name }}"
                 class="w-full border rounded-lg px-3 py-2" name="nama_lengkap">
-
+            <input type="hidden" value="{{ auth()->user()->id }}" name="id">
              <input type="text" value="{{ auth()->user()->username }}"
                 class="w-full border rounded-lg px-3 py-2" name="username">
 
             <input type="email" value="{{ auth()->user()->email }}"
                 class="w-full border rounded-lg px-3 py-2" name="email">
+                
 
             <input type="password" placeholder="Password baru"
                 class="w-full border rounded-lg px-3 py-2" name="password">
@@ -123,3 +125,17 @@
     </div>
 </div>
 </nav>
+
+<script>
+    // Profile picture preview
+    document.getElementById('profile_picture').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profilePreview').src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+</script>

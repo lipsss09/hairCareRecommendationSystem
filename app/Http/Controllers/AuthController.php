@@ -57,31 +57,29 @@ public function logout() {
     return redirect('/login');
 }
 
-public function updateProfile(Request $request) {
+public function updateProfile(Request $request)
+{
+    // dd($request->all());
     $user = Auth::user();
 
     $request->validate([
-        'nama_lengkap' => 'required',
-        'username' => 'required|unique:users,username,' . $user->id,
-        'email' => 'required|email|unique:users,email,' . $user->id,
-        'password' => 'nullable|min:6|confirmed'
+        'password' => 'nullable|min:6'
     ]);
+    $imagePath = $request->file('profile_picture');
+    $path = $imagePath->storeAs('users',$imagePath->hashName(),'public');
+    
 
-   $data = [
-        'name' => $request->name,
-        'username' => $request->username,
-        'email' => $request->email,
-    ];
-
+    $user->name = $request->nama_lengkap;
+    $user->username = $request->username;
+    $user->email = $request->email;
+    $user->profile_picture = $path;
     if ($request->filled('password')) {
-        $data['password'] = Hash::make($request->password);
+        $user->password = Hash::make($request->password);
     }
 
-    $user->update($data);
-
-
+  $user->save();
     return redirect()->back()->with('success', 'Profil berhasil diperbarui');
-
 }
+
 
 }
