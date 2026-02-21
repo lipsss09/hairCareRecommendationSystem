@@ -15,7 +15,7 @@
     <div class="flex">
         @include('layout.sidebar')
 
-        <main class="flex-1 ">
+        <main class="flex-1 bg-pink-50 ">
             @yield('content')
         </main>
     </div>

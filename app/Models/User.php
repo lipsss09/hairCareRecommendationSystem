@@ -47,4 +47,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function hairAssessments()
+{
+    return $this->hasMany(HairAssessment::class);
+}
 }

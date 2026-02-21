@@ -20,6 +20,7 @@
             <div class="inline-block bg-pink-500/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4 border border-pink-300/30">
                 <span class="text-sm font-medium">✨ Rekomendasi Personal untuk Anda</span>
             </div>
+
             
             <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]">
                 Temukan Produk<br>
@@ -43,30 +44,18 @@
 
 
 {{-- FILTER SECTION --}}
-<section class="max-w-7xl mx-auto px-6 mb-8 mt-6">
+<section class="max-w-7xl mx-auto px-6 mb-8 mt-6 bg-gradient-to-r from-pink-50 to-white rounded-2xl p-6 shadow-lg">
     <div class="bg-white rounded-2xl shadow-lg p-6">
         <div class="flex items-center gap-2 text-gray-800 font-bold text-lg mb-4">
             <i class="fa fa-filter text-pink-500"></i> 
+            <select class="bg-pink-500/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium text-white border border-pink-300/30" id="categories">
+                <option value=""></option> 
+                @foreach($categories as $category)
+                <option value="{{$category->id}}">{{$category->name}}</option>
+                @endforeach
+            
             <span>Filter Produk</span>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <button class="chip-enhanced active">
-                <i class="fa-solid fa-pump-soap"></i>
-                <span>Shampoo</span>
-            </button>
-            <button class="chip-enhanced">
-                <i class="fa-solid fa-droplet"></i>
-                <span>Conditioner</span>
-            </button>
-            <button class="chip-enhanced">
-                <i class="fa-solid fa-spa"></i>
-                <span>Hair Mask</span>
-            </button>
-            <button class="chip-enhanced">
-                <i class="fa-solid fa-flask"></i>
-                <span>Hair Oil</span>
-            </button>
+            </select>
         </div>
 
         <div class="border-t pt-4">
@@ -75,10 +64,9 @@
             </div>
 
             <div class="flex gap-3 flex-wrap">
-                <button class="chip">💰 Harga: Rendah ke Tinggi</button>
-                <button class="chip">💎 Harga: Tinggi ke Rendah</button>
-                <button class="chip">⭐ Rating Tertinggi</button>
-                <button class="chip">🔥 Terpopuler</button>
+                <button id="priceAsc" class="chip" value="asc">💰 Harga: Rendah ke Tinggi</button>
+                <button id="priceDesc" class="chip" value = "desc">💎 Harga: Tinggi ke Rendah</button>
+        
             </div>
         </div>
     </div>
@@ -86,6 +74,7 @@
 
 {{-- PRODUCT GRID --}}
 <section class="max-w-7xl mx-auto px-6 pb-16">
+    <div class="card shadow-lg rounded-2xl p-6 bg-white">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Produk Rekomendasi</h2>
         <a href="#" class="text-pink-500 hover:text-pink-600 font-medium flex items-center gap-2">
@@ -93,41 +82,40 @@
         </a>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        @for($i=0;$i<8;$i++)
-        <div class="product-card group">
+    <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+       @foreach($products as $product)
+       <div  class="card card-shadow rounded-xl p-4 bg-pink-50 hover:shadow-lg transition-shadow">
+        <div class="product-card animate-item group">
             <div class="relative overflow-hidden rounded-xl mb-3">
-                <img src="{{ asset('assets/images/products1.jpg') }}"
-                     class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500">
-                <div class="absolute top-2 right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                    -20%
-                </div>
+                <img src="{{$product->image_url}}" alt="{{$product->name}}"
+                     class="w-full h-min object-cover group-hover:scale-110 transition-transform duration-500">
+               
                 <div class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                     <i class="fa-solid fa-heart text-pink-500"></i>
                 </div>
             </div>
 
             <div class="flex items-start justify-between mb-2">
-                <h3 class="font-semibold text-gray-800 flex-1">Nourishing Shampoo</h3>
-                <div class="flex items-center gap-1 text-yellow-500 text-sm">
-                    <i class="fa-solid fa-star"></i>
-                    <span class="text-gray-600 font-medium">4.8</span>
-                </div>
+                <h3 class="font-semibold text-gray-800 flex-1">{{$product->name}}</h3>
+               
             </div>
+            <p class="text-sm text-gray-500 mb-1">{{$product->category->name}}</p>
             
-            <p class="text-pink-500 text-sm mb-2">Untuk rambut kering dan rusak</p>
+            <a class="text-pink-500 text-sm mb-2" href="{{$product->source}}" class="text-xl text-gray-500 mb-4 block font-bold">Lihat Detail Produk</a>
             
             <div class="flex items-center justify-between">
                 <div>
-                    <span class="text-gray-400 line-through text-sm">Rp 150.000</span>
-                    <p class="text-lg font-bold text-gray-800">Rp 120.000</p>
+                    
+                    <p class="text-lg font-bold text-gray-800">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
                 </div>
                 <button class="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-lg transition-colors">
                     <i class="fa-solid fa-cart-plus"></i>
                 </button>
             </div>
         </div>
-        @endfor
+       </div>
+        @endforeach
+    </div>
     </div>
 </section>
 
