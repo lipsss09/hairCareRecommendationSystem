@@ -9,8 +9,11 @@ class ProsesController extends Controller
     public function filterProducts(Request $request){
      $categoryId = $request->query('category_id');
     $sort = $request->query('sort');
+    $filter = $request->query('filter');
 
     $query = Products::with('category');
+
+   
 
     // Filter kategori
     if ($categoryId) {
@@ -25,8 +28,14 @@ class ProsesController extends Controller
     }
 
     // Default limit
-    $products = $query->limit(8)->get();
+    if($filter ==='all'){
+        $query->limit(100); // Atau sesuaikan dengan jumlah total produk
+    } else {
+        $query->limit(8);
+    }
+    $products = $query->get();
 
+    
     return response()->json($products);
     }
   

@@ -24,6 +24,7 @@ $(function () {
 });
 let currentCategory = '';
 let currentSort = '';
+let currentFilter = '';
 function loadProducts() {
     let params = new URLSearchParams();
 
@@ -33,6 +34,9 @@ function loadProducts() {
 
     if (currentSort) {
         params.append('sort', currentSort);
+    }
+    if(currentFilter){
+        params.append('filter', currentFilter);
     }
 
     fetch(`/get-products?${params.toString()}`)
@@ -46,7 +50,7 @@ function loadProducts() {
 
                 let card = `
                     <div class="card card-shadow rounded-xl p-4 bg-pink-50">
-                        <div class="product-card">
+                        <div class="animate-item product-card">
                             <div class="relative overflow-hidden rounded-xl mb-3">
                                 <img src="${product.image_url}" 
                                      class="w-full h-min object-cover">
@@ -124,6 +128,12 @@ document.addEventListener("DOMContentLoaded", function () {
     
     let ascending = document.getElementById("priceAsc");
     let descending = document.getElementById("priceDesc");
+    let filterAll = document.getElementById("showAllProducts");
+
+    filterAll.addEventListener("click", function(){
+        currentFilter = 'all';
+    loadProducts();
+    });
 
     ascending.addEventListener("click", function(){
         currentSort = 'asc';

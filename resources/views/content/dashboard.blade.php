@@ -77,9 +77,9 @@
     <div class="card shadow-lg rounded-2xl p-6 bg-white">
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Produk Rekomendasi</h2>
-        <a href="#" class="text-pink-500 hover:text-pink-600 font-medium flex items-center gap-2">
-            Lihat Semua <i class="fa-solid fa-arrow-right"></i>
-        </a>
+            <button id="showAllProducts" type="button" class="text-pink-500 hover:text-pink-600 font-medium transition-colors" value="all">
+                Lihat Semua <i class="fa-solid fa-arrow-right"></i>
+            </button>
     </div>
 
     <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

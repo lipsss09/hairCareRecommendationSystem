@@ -95,11 +95,11 @@
                     <p class="text-sm text-gray-500 mb-4">Boleh pilih lebih dari satu</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-3 ">
                         @foreach ($hairProblems as $problem)
-                            <label class="flex items-center cursor-pointer">
+                            <label class="flex items-center cursor-pointer ">
                                 <input type="checkbox"
                                        name="hair_problem[]"
                                        value="{{ $problem->id }}"
-                                       class="hidden peer"
+                                       class="hidden peer "
                                        {{ in_array($problem->id, old('hair_problem', [])) ? 'checked' : '' }}>
                                 <div class="w-full px-5 py-3 bg-pink-50 rounded-full font-medium text-gray-700 transition-all hover:bg-pink-100 peer-checked:bg-pink-200 flex items-center">
                                     <span class="w-5 h-5 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 peer-checked:border-pink-500 peer-checked:bg-pink-500"></span>
