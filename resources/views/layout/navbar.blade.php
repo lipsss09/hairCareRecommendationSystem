@@ -5,7 +5,12 @@
         <!-- LEFT: Logo -->
         <div class="flex items-center gap-2">
             <img src="{{ asset('assets/images/icon.png') }}" class="h-10 w-10" alt="logo">
-            <a href="{{ route('dashboard') }}" class="text-pink-300 font-bold text-xl">Hair Care</a>
+          <a href="{{ route('dashboard') }}"
+   class="font-bold text-xl bg-gradient-to-r from-pink-400 via-pink-500 to-pink-300 bg-clip-text text-transparent">
+   Hair Care
+
+</a>
+
 
         </div>
 
