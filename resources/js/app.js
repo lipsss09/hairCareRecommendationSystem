@@ -52,9 +52,11 @@ function loadProducts() {
                     <div class="card card-shadow rounded-xl p-4 bg-pink-50">
                         <div class="animate-item product-card">
                             <div class="relative overflow-hidden rounded-xl mb-3">
-                                <img src="${product.image_url}"
-                                     alt="${product.name}"
-                                     class="w-full h-min object-cover">
+                             <div class="w-full h-48 overflow-hidden bg-pink-50 flex items-center justify-center">
+    <img src="${product.image_url}" alt="${product.name}"
+         class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500">
+         </div>
+</div>
                             </div>
 
                             <h3 class="font-semibold text-gray-800 mb-1">
