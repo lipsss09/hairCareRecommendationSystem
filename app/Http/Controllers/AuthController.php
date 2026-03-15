@@ -46,7 +46,13 @@ public function login(Request $request)
     ]);
 
     if (Auth::attempt($credentials)) {
-        $request->session()->regenerate(); // penting biar aman
+        $request->session()->regenerate();
+
+        // Redirect berdasarkan role
+        if (Auth::user()->role === 'admin') {
+            return redirect('/admin');
+        }
+
         return redirect('/dashboard');
     }
 
