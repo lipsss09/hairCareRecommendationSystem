@@ -87,8 +87,10 @@
        <div  class="card card-shadow rounded-xl p-4 bg-pink-50 hover:shadow-lg transition-shadow">
         <div class="product-card animate-item group">
             <div class="relative overflow-hidden rounded-xl mb-3">
-                <img src="{{$product->image_url}}" alt="{{$product->name}}"
-                     class="w-full h-min object-cover group-hover:scale-110 transition-transform duration-500">
+               <div class="w-full h-48 overflow-hidden bg-pink-50 flex items-center justify-center">
+    <img src="{{$product->image_url}}" alt="{{$product->name}}"
+         class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500">
+</div>
                
                 <div class="absolute top-2 left-2 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                     <i class="fa-solid fa-heart text-pink-500"></i>

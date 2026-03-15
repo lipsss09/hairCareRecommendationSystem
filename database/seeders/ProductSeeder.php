@@ -9,8 +9,10 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $file = database_path('seeders/data/produk_rambut_processed.csv');
-        $csv = array_map('str_getcsv', file($file));
+        $file = database_path('seeders/data/dataset.csv');
+        $csv = array_map(function ($line) {
+    return str_getcsv($line, ';');
+}, file($file));
         $header = array_shift($csv);
         $header = array_map(function($h) {
     $h = preg_replace('/^\x{FEFF}/u', '', $h); // hapus BOM
@@ -19,13 +21,15 @@ class ProductSeeder extends Seeder
 
         $insertData = [];
         $categories = DB::table('categories')->pluck('id', 'name');
-
+        //dd($header);
+        // dd($csv[0]);
         foreach ($csv as $row) {
             $data = array_combine($header, $row);
-            //dd($header);
-            $categoryName = trim($data['category_fix']);
+            
+            $categoryName = trim($data['category']);
             $categoryId = $categories[$categoryName] ?? null;
             $dateRaw = trim($data['date_collected']);
+            $name = ucwords($data['name']);
 
 $formattedDate = null;
 
@@ -36,13 +40,13 @@ if (!empty($dateRaw)) {
 
             $insertData[] = [
                 'product_id' => $data['product_id'],
-                'name' => $data['name'],
-                'brand' => $data['brand_normalized'],
+                'name' => $name,
+                'brand' => $data['brand'],
                 'category_id' => $categoryId, 
-                'price' => $data['price_normalized'],
+                'price' => $data['price'],
                 'size' => $data['size_value'],
-                'size_unit' => $data['size_units'],
-                'ingredients' => $data['ingredients_normalized'],
+                'size_unit' => $data['size_unit'],
+                'ingredients' => $data['ingredients'],
                 'key_ingredients' => $data['key_ingredients'],
                 'image_url' => $data['image_url'] ?? null,
                 'source' => $data['source'] ?? null,
