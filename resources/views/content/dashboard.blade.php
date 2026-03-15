@@ -108,7 +108,9 @@
                     
                     <p class="text-lg font-bold text-gray-800">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
                 </div>
-                <button class="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-lg transition-colors">
+                <button
+                    onclick="addToCart('{{ $product->product_id }}', this)"
+                    class="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-lg transition-colors">
                     <i class="fa-solid fa-cart-plus"></i>
                 </button>
             </div>

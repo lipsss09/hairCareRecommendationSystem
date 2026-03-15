@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Products extends Model
 {
-   use HasFactory;
+    use HasFactory;
 
     protected $table = 'products';
 
@@ -15,7 +15,12 @@ class Products extends Model
 
     public function category()
     {
-        return $this->belongsTo(Categories::class, 'category_id');
+        return $this->belongsTo(Categories::class , 'category_id');
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class , 'product_id', 'product_id');
     }
 
 }

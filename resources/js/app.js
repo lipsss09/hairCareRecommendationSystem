@@ -14,13 +14,13 @@ import 'select2/dist/css/select2.min.css';
 $(function () {
     $('#categories').select2({
         placeholder: 'Pilih Kategori',
-        allowClear:true,
+        allowClear: true,
         width: '20%',
     });
     $('#categories').on('change', function () {
-     currentCategory = $(this).val();
-    loadProducts();
-});
+        currentCategory = $(this).val();
+        loadProducts();
+    });
 });
 let currentCategory = '';
 let currentSort = '';
@@ -35,7 +35,7 @@ function loadProducts() {
     if (currentSort) {
         params.append('sort', currentSort);
     }
-    if(currentFilter){
+    if (currentFilter) {
         params.append('filter', currentFilter);
     }
 
@@ -52,11 +52,12 @@ function loadProducts() {
                     <div class="card card-shadow rounded-xl p-4 bg-pink-50">
                         <div class="animate-item product-card">
                             <div class="relative overflow-hidden rounded-xl mb-3">
-                                <img src="${product.image_url}" 
+                                <img src="${product.image_url}"
+                                     alt="${product.name}"
                                      class="w-full h-min object-cover">
                             </div>
 
-                            <h3 class="font-semibold text-gray-800">
+                            <h3 class="font-semibold text-gray-800 mb-1">
                                 ${product.name}
                             </h3>
 
@@ -64,17 +65,26 @@ function loadProducts() {
                                 ${product.category ? product.category.name : ''}
                             </p>
 
-                            <p class="text-lg font-bold text-gray-800">
-                                Rp ${Number(product.price).toLocaleString('id-ID')}
-                            </p>
+                            <a href="${product.source}" class="text-pink-500 text-sm mb-2 block">Lihat Detail Produk</a>
+
+                            <div class="flex items-center justify-between mt-2">
+                                <p class="text-lg font-bold text-gray-800">
+                                    Rp ${Number(product.price).toLocaleString('id-ID')}
+                                </p>
+                                <button
+                                    onclick="addToCart('${product.product_id}', this)"
+                                    class="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-lg transition-colors">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
 
                 grid.innerHTML += card;
                 if (data.length === 0) {
-    grid.innerHTML = '<p class="col-span-4 text-center">Produk tidak ditemukan</p>';
-}
+                    grid.innerHTML = '<p class="col-span-4 text-center">Produk tidak ditemukan</p>';
+                }
             });
             initScrollAnimation();
 
@@ -120,65 +130,30 @@ function initScrollAnimation() {
     });
 }
 document.addEventListener("DOMContentLoaded", function () {
-    const btn = document.getElementById("profileBtn");
-    const dropdown = document.getElementById("profileDropdown");
-    const editBtn = document.getElementById("editButton");
-    const modal = document.getElementById("editModal");
-    const closeModal = document.getElementById("closeModal");
-    
     let ascending = document.getElementById("priceAsc");
     let descending = document.getElementById("priceDesc");
     let filterAll = document.getElementById("showAllProducts");
 
-    filterAll.addEventListener("click", function(){
-        currentFilter = 'all';
-    loadProducts();
-    });
+    if (filterAll) {
+        filterAll.addEventListener("click", function () {
+            currentFilter = 'all';
+            loadProducts();
+        });
+    }
 
-    ascending.addEventListener("click", function(){
-        currentSort = 'asc';
-    loadProducts();
-    });
-    descending.addEventListener("click", function(){
-        currentSort = 'desc';
-    loadProducts();
-    });
-     initScrollAnimation();
-    // Toggle dropdown
-    btn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        dropdown.classList.toggle("hidden");
+    if (ascending) {
+        ascending.addEventListener("click", function () {
+            currentSort = 'asc';
+            loadProducts();
+        });
+    }
 
-    });
+    if (descending) {
+        descending.addEventListener("click", function () {
+            currentSort = 'desc';
+            loadProducts();
+        });
+    }
 
-    // JANGAN tutup kalau klik di dalam dropdown
-    dropdown.addEventListener("click", function (e) {
-        e.stopPropagation();
-    });
-
-    // Klik luar baru tutup
-    document.addEventListener("click", function () {
-        dropdown.classList.add("hidden");
-    });
-
-    // Open modal
-    editBtn.addEventListener("click", function (e) {
-        e.stopPropagation();
-        modal.classList.remove("hidden");
-        modal.classList.add("flex");
-    });
-
-    // Close modal
-    closeModal.addEventListener("click", function () {
-        modal.classList.add("hidden");
-        modal.classList.remove("flex");
-    });
-
-    modal.addEventListener("click", function (e) {
-        if (e.target === modal) {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        }
-    });
+    initScrollAnimation();
 });
-

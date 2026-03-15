@@ -48,7 +48,12 @@ class User extends Authenticatable
         ];
     }
     public function hairAssessments()
-{
-    return $this->hasMany(HairAssessment::class);
-}
+    {
+        return $this->hasMany(HairAssessment::class);
+    }
+
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
 }
