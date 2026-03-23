@@ -47,8 +47,8 @@ Route::middleware(['auth'])->group(function () {
      Route::post('/cart', [CartController::class , 'store'])->name('cart.store');
      Route::delete('/cart/{id}', [CartController::class , 'destroy'])->name('cart.destroy');
          // Rekomendasi
-    Route::get('/recommendations/{assessment}', [RecommendationController::class, 'show'])
-        ->name('recommendations.show');
+    Route::get('/recommendation/{assessment}', [RecommendationController::class, 'show'])
+        ->name('recommendation.show');
 });
 
 // ==================== ADMIN ROUTES ====================

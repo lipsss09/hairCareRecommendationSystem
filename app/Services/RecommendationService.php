@@ -15,9 +15,9 @@ class RecommendationService
      * Sesuaikan dengan rentang harga dataset kamu.
      */
     private const BUDGET_RANGE = [
-        'terjangkau' => [0, 75000],
-        'medium'     => [75001, 150000],
-        'premium'    => [150001, PHP_INT_MAX],
+        'terjangkau' => [0, 199999],
+        'medium'     => [200000, 499999],
+        'premium'    => [500000, PHP_INT_MAX],
     ];
 
     /**
@@ -175,10 +175,19 @@ class RecommendationService
      *
      * @return array [float $similarity, array $matchedIngredients]
      */
+    private function parseFullIngredients(?string $raw): array
+{
+    if (empty($raw)) return [];
+
+    return array_map(
+        fn($s) => strtolower(trim($s)),
+        explode(',', $raw)
+    );
+}
     private function cosineSimilarity(Products $product, array $vectorQ, float $magnitudeQ): array
     {
         // Parse key_ingredients produk dari JSON string
-        $keyIngredients = $this->parseKeyIngredients($product->key_ingredients);
+        $keyIngredients = $this->parseFullIngredients($product->ingredients);
 
         if (empty($keyIngredients)) {
             return [0.0, []];

@@ -42,4 +42,5 @@ class RecommendationController extends Controller
             'recommendations' => $recommendations,
         ]);
     }
+
 }
