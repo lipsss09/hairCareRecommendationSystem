@@ -6,6 +6,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\ProsesController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AdminController;
 
 use App\Http\Controllers\HairAssessmentController;
 Route::get('/', function () {
@@ -44,4 +45,27 @@ Route::middleware(['auth'])->group(function () {
      Route::get('/cart', [CartController::class , 'index'])->name('cart.index');
      Route::post('/cart', [CartController::class , 'store'])->name('cart.store');
      Route::delete('/cart/{id}', [CartController::class , 'destroy'])->name('cart.destroy');
+});
+
+// ==================== ADMIN ROUTES ====================
+Route::prefix('admin')->middleware(['auth', 'admin'])->group(function () {
+     Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+
+     // Produk CRUD
+     Route::get('/produk', [AdminController::class, 'produk'])->name('admin.produk');
+     Route::post('/produk', [AdminController::class, 'storeProduk'])->name('admin.produk.store');
+     Route::put('/produk/{id}', [AdminController::class, 'updateProduk'])->name('admin.produk.update');
+     Route::delete('/produk/{id}', [AdminController::class, 'destroyProduk'])->name('admin.produk.destroy');
+
+     // Pengguna CRUD
+     Route::get('/pengguna', [AdminController::class, 'pengguna'])->name('admin.pengguna');
+     Route::post('/pengguna', [AdminController::class, 'storePengguna'])->name('admin.pengguna.store');
+     Route::put('/pengguna/{id}', [AdminController::class, 'updatePengguna'])->name('admin.pengguna.update');
+     Route::delete('/pengguna/{id}', [AdminController::class, 'destroyPengguna'])->name('admin.pengguna.destroy');
+
+     // Kategori CRUD
+     Route::get('/kategori', [AdminController::class, 'kategori'])->name('admin.kategori');
+     Route::post('/kategori', [AdminController::class, 'storeKategori'])->name('admin.kategori.store');
+     Route::put('/kategori/{id}', [AdminController::class, 'updateKategori'])->name('admin.kategori.update');
+     Route::delete('/kategori/{id}', [AdminController::class, 'destroyKategori'])->name('admin.kategori.destroy');
 });
