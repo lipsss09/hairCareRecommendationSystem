@@ -9,9 +9,9 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $file = database_path('seeders/data/dataset.csv');
+        $file = database_path('seeders/data/haircare_dataset.csv');
         $csv = array_map(function ($line) {
-    return str_getcsv($line, ';');
+    return str_getcsv($line, ',');
 }, file($file));
         $header = array_shift($csv);
         $header = array_map(function($h) {
@@ -55,7 +55,7 @@ if (!empty($dateRaw)) {
                 'updated_at' => now(),
             ];
         }
-
+        DB::table('products')->truncate();
         DB::table('products')->insert($insertData);
     }
 }

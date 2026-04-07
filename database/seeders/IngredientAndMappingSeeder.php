@@ -87,20 +87,19 @@ class IngredientAndMappingSeeder extends Seeder
         DB::table('ingredients')->insertOrIgnore($ingredients);
 
         // ---------------------------------------------------------------
-        // 2. PROBLEM → INGREDIENT MAPPING
-        // Referensi hair_problem_id sesuai data DB:
-        //   1=Ketombe, 2=Rambut Rontok, 3=Kulit Kepala Berminyak,
-        //   4=Kulit Kepala Kering, 5=Kulit Kepala Sensitif, 6=Rambut Kusam,
-        //   7=Rambut Tipis, 8=Rambut Kering, 9=Rambut Berminyak,
-        //   10=Rambut Bercabang, 11=Rambut Mengembang, 12=Gatal pada Kulit Kepala,
-        //   13=Kulit Kepala Iritasi
+        // 2. PROBLEM → INGREDIENT MAPPING (updated dari Mapping_Fix.xlsx)
+        // hair_problem_id: 1=Ketombe, 2=Rambut Rontok, 3=Kulit Kepala Berminyak,
+        // 4=Kulit Kepala Kering, 5=Kulit Kepala Sensitif, 6=Rambut Kusam,
+        // 7=Rambut Tipis, 8=Rambut Kering, 9=Rambut Berminyak,
+        // 10=Rambut Bercabang, 11=Rambut Mengembang,
+        // 12=Gatal pada Kulit Kepala, 13=Kulit Kepala Iritasi
         // ---------------------------------------------------------------
 
-        // Helper: resolve ingredient DB id dari ingredient_id string
         $ingMap = DB::table('ingredients')->pluck('id', 'ingredient_id');
 
         $rawMapping = [
-            // M01 - Ketombe (hair_problem_id = 1)
+
+            // M01 - Ketombe (16 bahan)
             1 => [
                 'I28' => 3, // piroctone olamine
                 'I14' => 3, // climbazole
@@ -113,9 +112,14 @@ class IngredientAndMappingSeeder extends Seeder
                 'I41' => 3, // ketoconazole
                 'I42' => 3, // selenium sulfide
                 'I43' => 2, // tea tree oil
+                'I02' => 2, // aesculus hippocastanum seed extract
+                'I24' => 2, // niacinamide
+                'I30' => 2, // retinyl palmitate
+                'I32' => 2, // rosmarinus officinalis leaf oil
+                'I66' => 2, // hamamelis virginiana extract
             ],
 
-            // M02 - Rambut Rontok (hair_problem_id = 2)
+            // M02 - Rambut Rontok (27 bahan)
             2 => [
                 'I02' => 3, // aesculus hippocastanum seed extract
                 'I09' => 2, // caffeine
@@ -124,7 +128,7 @@ class IngredientAndMappingSeeder extends Seeder
                 'I16' => 3, // diaminopyrimidine oxide
                 'I25' => 3, // oleanolic acid
                 'I15' => 3, // copper tripeptide-1
-                'I13' => 1, // chrysin
+                'I29' => 2, // polygonum multiflorum root extract
                 'I31' => 2, // rosmarinus officinalis leaf extract
                 'I32' => 2, // rosmarinus officinalis leaf oil
                 'I44' => 3, // minoxidil
@@ -136,9 +140,17 @@ class IngredientAndMappingSeeder extends Seeder
                 'I50' => 3, // biotinoyl tripeptide-1
                 'I51' => 3, // acetyl tetrapeptide-3
                 'I52' => 2, // palmitoyl tetrapeptide-7
+                'I01' => 3, // adenosine
+                'I05' => 2, // arginine
+                'I06' => 2, // ascorbic acid
+                'I07' => 2, // azelaic acid
+                'I10' => 2, // camellia sinensis leaf extract
+                'I35' => 2, // tocopherol
+                'I36' => 2, // tocopheryl acetate
+                'I61' => 2, // ricinus communis seed oil
             ],
 
-            // M03 - Kulit Kepala Berminyak (hair_problem_id = 3)
+            // M03 - Kulit Kepala Berminyak (18 bahan)
             3 => [
                 'I24' => 3, // niacinamide
                 'I39' => 3, // zinc pca
@@ -148,17 +160,19 @@ class IngredientAndMappingSeeder extends Seeder
                 'I28' => 2, // piroctone olamine
                 'I14' => 2, // climbazole
                 'I33' => 3, // salicylic acid
-                'I37' => 3, // zinc gluconate
-                'I38' => 3, // zinc lactate
-                'I39' => 3, // zinc pca
                 'I22' => 2, // lactic acid
                 'I40' => 2, // zinc pyrithione
                 'I41' => 2, // ketoconazole
                 'I42' => 2, // selenium sulfide
                 'I43' => 2, // tea tree oil
+                'I07' => 2, // azelaic acid
+                'I10' => 2, // camellia sinensis leaf extract
+                'I30' => 2, // retinyl palmitate
+                'I32' => 2, // rosmarinus officinalis leaf oil
+                'I58' => 2, // simmondsia chinensis seed oil
             ],
 
-            // M04 - Kulit Kepala Kering (hair_problem_id = 4)
+            // M04 - Kulit Kepala Kering (19 bahan)
             4 => [
                 'I55' => 3, // sodium hyaluronate
                 'I56' => 3, // glycerin
@@ -167,37 +181,71 @@ class IngredientAndMappingSeeder extends Seeder
                 'I59' => 2, // olea europaea oil
                 'I60' => 2, // macadamia ternifolia seed oil
                 'I61' => 2, // ricinus communis seed oil
+                'I02' => 2, // aesculus hippocastanum seed extract
+                'I03' => 2, // allantoin
+                'I04' => 2, // argania spinosa kernel oil
+                'I11' => 2, // centella asiatica extract
+                'I12' => 2, // ceramide np
+                'I17' => 2, // glycyrrhiza glabra root extract
+                'I27' => 2, // panthenol
+                'I36' => 2, // tocopheryl acetate
+                'I53' => 2, // hydrolyzed collagen
+                'I62' => 3, // aloe barbadensis leaf extract
+                'I63' => 2, // bisabolol
+                'I64' => 2, // chamomilla recutita extract
             ],
 
-            // M05 - Kulit Kepala Sensitif (hair_problem_id = 5)
+            // M05 - Kulit Kepala Sensitif (19 bahan)
             5 => [
+                'I03' => 3, // allantoin
                 'I11' => 3, // centella asiatica extract
                 'I17' => 3, // glycyrrhiza glabra root extract
-                'I27' => 1, // panthenol
-                'I12' => 1, // ceramide np
                 'I10' => 2, // camellia sinensis leaf extract
                 'I62' => 2, // aloe barbadensis leaf extract
                 'I63' => 3, // bisabolol
                 'I64' => 3, // chamomilla recutita extract
                 'I65' => 3, // calendula officinalis extract
                 'I67' => 3, // beta-glucan
+                'I02' => 2, // aesculus hippocastanum seed extract
+                'I07' => 2, // azelaic acid
+                'I23' => 2, // menthol
+                'I24' => 2, // niacinamide
+                'I36' => 2, // tocopheryl acetate
+                'I37' => 2, // zinc gluconate
+                'I38' => 2, // zinc lactate
+                'I43' => 2, // tea tree oil
+                'I52' => 2, // palmitoyl tetrapeptide-7
+                'I66' => 2, // hamamelis virginiana extract
             ],
 
-            // M06 - Rambut Kusam (hair_problem_id = 6)
+            // M06 - Rambut Kusam (23 bahan)
             6 => [
                 'I21' => 2, // keratin
                 'I18' => 2, // hydrolyzed keratin
                 'I19' => 3, // hydrolyzed silk
                 'I20' => 2, // hydrolyzed wheat protein
-                'I05' => 1, // arginine
-                'I15' => 1, // copper tripeptide-1
                 'I53' => 2, // hydrolyzed collagen
                 'I54' => 3, // silk amino acids
                 'I68' => 3, // dimethicone
                 'I69' => 3, // amodimethicone
+                'I02' => 2, // aesculus hippocastanum seed extract
+                'I04' => 3, // argania spinosa kernel oil
+                'I06' => 2, // ascorbic acid
+                'I12' => 2, // ceramide np
+                'I27' => 2, // panthenol
+                'I33' => 2, // salicylic acid
+                'I35' => 2, // tocopherol
+                'I36' => 3, // tocopheryl acetate
+                'I55' => 2, // sodium hyaluronate
+                'I56' => 2, // glycerin
+                'I57' => 2, // butyrospermum parkii
+                'I58' => 2, // simmondsia chinensis seed oil
+                'I59' => 2, // olea europaea oil
+                'I60' => 2, // macadamia ternifolia seed oil
+                'I61' => 2, // ricinus communis seed oil
             ],
 
-            // M07 - Rambut Tipis (hair_problem_id = 7)
+            // M07 - Rambut Tipis (25 bahan)
             7 => [
                 'I01' => 3, // adenosine
                 'I09' => 2, // caffeine
@@ -217,10 +265,16 @@ class IngredientAndMappingSeeder extends Seeder
                 'I49' => 2, // baicapil
                 'I50' => 3, // biotinoyl tripeptide-1
                 'I51' => 2, // acetyl tetrapeptide-3
+                'I02' => 3, // aesculus hippocastanum seed extract
+                'I05' => 2, // arginine
+                'I07' => 2, // azelaic acid
+                'I10' => 2, // camellia sinensis leaf extract
+                'I29' => 2, // polygonum multiflorum root extract
                 'I52' => 2, // palmitoyl tetrapeptide-7
+                'I61' => 2, // ricinus communis seed oil
             ],
 
-            // M08 - Rambut Kering (hair_problem_id = 8)
+            // M08 - Rambut Kering (30 bahan)
             8 => [
                 'I21' => 2, // keratin
                 'I18' => 2, // hydrolyzed keratin
@@ -237,27 +291,46 @@ class IngredientAndMappingSeeder extends Seeder
                 'I59' => 3, // olea europaea oil
                 'I60' => 3, // macadamia ternifolia seed oil
                 'I61' => 2, // ricinus communis seed oil
-                'I68' => 3, // dimethicone
-                'I69' => 3, // amodimethicone
+                'I02' => 2, // aesculus hippocastanum seed extract
+                'I03' => 2, // allantoin
+                'I04' => 3, // argania spinosa kernel oil
+                'I11' => 2, // centella asiatica extract
+                'I12' => 3, // ceramide np
+                'I17' => 2, // glycyrrhiza glabra root extract
+                'I27' => 3, // panthenol
+                'I36' => 2, // tocopheryl acetate
+                'I62' => 3, // aloe barbadensis leaf extract
+                'I63' => 2, // bisabolol
+                'I64' => 2, // chamomilla recutita extract
+                'I65' => 2, // calendula officinalis extract
+                'I67' => 2, // beta-glucan
+                'I68' => 2, // dimethicone
+                'I69' => 2, // amodimethicone
             ],
 
-            // M09 - Rambut Berminyak (hair_problem_id = 9)
+            // M09 - Rambut Berminyak (18 bahan)
             9 => [
                 'I24' => 3, // niacinamide
                 'I39' => 3, // zinc pca
                 'I37' => 3, // zinc gluconate
                 'I38' => 3, // zinc lactate
                 'I66' => 3, // hamamelis virginiana extract
-                'I22' => 2, // lactic acid (sesuai mapping M09 di Excel baris 13)
+                'I07' => 2, // azelaic acid
+                'I10' => 2, // camellia sinensis leaf extract
                 'I14' => 2, // climbazole
+                'I22' => 2, // lactic acid
+                'I28' => 2, // piroctone olamine
+                'I30' => 2, // retinyl palmitate
+                'I32' => 2, // rosmarinus officinalis leaf oil
                 'I33' => 3, // salicylic acid
                 'I40' => 2, // zinc pyrithione
                 'I41' => 2, // ketoconazole
                 'I42' => 2, // selenium sulfide
                 'I43' => 2, // tea tree oil
+                'I58' => 2, // simmondsia chinensis seed oil
             ],
 
-            // M10 - Rambut Bercabang (hair_problem_id = 10)
+            // M10 - Rambut Bercabang (19 bahan)
             10 => [
                 'I21' => 3, // keratin
                 'I18' => 3, // hydrolyzed keratin
@@ -267,9 +340,20 @@ class IngredientAndMappingSeeder extends Seeder
                 'I15' => 1, // copper tripeptide-1
                 'I53' => 2, // hydrolyzed collagen
                 'I54' => 2, // silk amino acids
+                'I04' => 2, // argania spinosa kernel oil
+                'I12' => 2, // ceramide np
+                'I27' => 2, // panthenol
+                'I36' => 2, // tocopheryl acetate
+                'I57' => 2, // butyrospermum parkii
+                'I58' => 2, // simmondsia chinensis seed oil
+                'I59' => 2, // olea europaea oil
+                'I60' => 2, // macadamia ternifolia seed oil
+                'I61' => 2, // ricinus communis seed oil
+                'I68' => 3, // dimethicone
+                'I69' => 3, // amodimethicone
             ],
 
-            // M11 - Rambut Mengembang (hair_problem_id = 11)
+            // M11 - Rambut Mengembang (18 bahan)
             11 => [
                 'I21' => 2, // keratin
                 'I18' => 2, // hydrolyzed keratin
@@ -281,9 +365,17 @@ class IngredientAndMappingSeeder extends Seeder
                 'I54' => 2, // silk amino acids
                 'I68' => 3, // dimethicone
                 'I69' => 3, // amodimethicone
+                'I04' => 2, // argania spinosa kernel oil
+                'I12' => 2, // ceramide np
+                'I27' => 2, // panthenol
+                'I57' => 2, // butyrospermum parkii
+                'I58' => 2, // simmondsia chinensis seed oil
+                'I59' => 2, // olea europaea oil
+                'I60' => 2, // macadamia ternifolia seed oil
+                'I61' => 2, // ricinus communis seed oil
             ],
 
-            // M12 - Gatal pada Kulit Kepala (hair_problem_id = 12)
+            // M12 - Gatal pada Kulit Kepala (23 bahan)
             12 => [
                 'I03' => 2, // allantoin
                 'I11' => 2, // centella asiatica extract
@@ -296,6 +388,22 @@ class IngredientAndMappingSeeder extends Seeder
                 'I64' => 2, // chamomilla recutita extract
                 'I65' => 2, // calendula officinalis extract
                 'I67' => 2, // beta-glucan
+                'I02' => 2, // aesculus hippocastanum seed extract
+                'I14' => 2, // climbazole
+                'I23' => 3, // menthol
+                'I28' => 2, // piroctone olamine
+                'I33' => 2, // salicylic acid
+                'I37' => 2, // zinc gluconate
+                'I38' => 2, // zinc lactate
+                'I40' => 3, // zinc pyrithione
+                'I41' => 3, // ketoconazole
+                'I42' => 2, // selenium sulfide
+                'I43' => 3, // tea tree oil
+                'I66' => 2, // hamamelis virginiana extract
+            ],
+
+            // M13 - Kulit Kepala Iritasi (29 bahan)
+            13 => [
                 'I28' => 2, // piroctone olamine
                 'I14' => 2, // climbazole
                 'I33' => 2, // salicylic acid
@@ -307,10 +415,6 @@ class IngredientAndMappingSeeder extends Seeder
                 'I41' => 2, // ketoconazole
                 'I42' => 2, // selenium sulfide
                 'I43' => 2, // tea tree oil
-            ],
-
-            // M13 - Kulit Kepala Iritasi (hair_problem_id = 13)
-            13 => [
                 'I03' => 3, // allantoin
                 'I11' => 3, // centella asiatica extract
                 'I17' => 3, // glycyrrhiza glabra root extract
@@ -322,8 +426,18 @@ class IngredientAndMappingSeeder extends Seeder
                 'I64' => 3, // chamomilla recutita extract
                 'I65' => 3, // calendula officinalis extract
                 'I67' => 3, // beta-glucan
+                'I02' => 3, // aesculus hippocastanum seed extract
+                'I07' => 2, // azelaic acid
+                'I23' => 2, // menthol
+                'I24' => 2, // niacinamide
+                'I36' => 2, // tocopheryl acetate
+                'I52' => 2, // palmitoyl tetrapeptide-7
+                'I66' => 2, // hamamelis virginiana extract
             ],
         ];
+
+        // Hapus mapping lama dulu, lalu insert yang baru
+        DB::table('problem_ingredient_map')->truncate();
 
         $rows = [];
         $now  = now();
@@ -331,7 +445,7 @@ class IngredientAndMappingSeeder extends Seeder
         foreach ($rawMapping as $problemId => $ingredientPriorities) {
             foreach ($ingredientPriorities as $ingCode => $priority) {
                 if (! isset($ingMap[$ingCode])) {
-                    continue; // skip jika ingredient tidak ditemukan
+                    continue;
                 }
                 $rows[] = [
                     'hair_problem_id' => $problemId,
@@ -343,7 +457,8 @@ class IngredientAndMappingSeeder extends Seeder
             }
         }
 
-        // insertOrIgnore aman dijalankan berulang kali
-        DB::table('problem_ingredient_map')->insertOrIgnore($rows);
+        DB::table('problem_ingredient_map')->insert($rows);
+
+        $this->command->info('Mapping berhasil diupdate: ' . count($rows) . ' baris.');
     }
 }

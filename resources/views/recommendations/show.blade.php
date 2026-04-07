@@ -41,7 +41,7 @@
             <div class="text-gray-300 text-6xl mb-4">🔍</div>
             <p class="text-gray-500 font-medium">Belum ada produk yang cocok ditemukan.</p>
             <p class="text-sm text-gray-400 mt-1">Coba ubah pilihan masalah atau rentang budget kamu.</p>
-            <a href="{{ route('hair-assessment.create') }}"
+            <a href=""
                class="inline-block mt-6 px-5 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition">
                 Ubah Assessment
             </a>
