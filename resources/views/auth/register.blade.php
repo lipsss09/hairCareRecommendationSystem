@@ -98,7 +98,7 @@ document.addEventListener("DOMContentLoaded", function () {
     anime({
         targets: '#heroText .letter',
         translateY: [
-            { value: -20, duration: 300, easing: 'easeOutQuad' },
+            { value: 0, duration: 300, easing: 'easeOutQuad' },
             { value: 0, duration: 300, easing: 'easeInQuad' }
         ],
         scale: [

@@ -19,11 +19,12 @@ class RecommendationController extends Controller
         // Pastikan assessment milik user yang sedang login
         abort_if($assessment->user_id !== auth()->id(), 403);
 
-        $recommendations = $this->service->recommend($assessment, topN: 10);
+        $result = $this->service->recommendWithEvaluation($assessment, topN: 10, threshold: 0.6);
 
         return view('recommendations.show', [
             'assessment'      => $assessment->load(['hairProblems', 'scalpConditions']),
-            'recommendations' => $recommendations,
+            'recommendations' => $result['recommendations'],
+            'evaluation'      => $result['evaluation'],
         ]);
     }
 
@@ -35,11 +36,12 @@ class RecommendationController extends Controller
     {
         abort_if($assessment->user_id !== auth()->id(), 403);
 
-        $recommendations = $this->service->computeFresh($assessment, topN: 10);
+        $result = $this->service->computeFreshWithEvaluation($assessment, topN: 10, threshold: 0.6);
 
         return view('recommendations.show', [
             'assessment'      => $assessment->load(['hairProblems', 'scalpConditions']),
-            'recommendations' => $recommendations,
+            'recommendations' => $result['recommendations'],
+            'evaluation'      => $result['evaluation'],
         ]);
     }
 

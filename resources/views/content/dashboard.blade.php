@@ -18,7 +18,7 @@
         <!-- Hero Content -->
         <div class="absolute left-10 md:left-20 top-1/2 -translate-y-1/2 text-white max-w-xl">
             <div class="inline-block bg-pink-500/20 backdrop-blur-sm px-4 py-2 rounded-full mb-4 border border-pink-300/30">
-                <span class="text-sm font-medium">✨ Rekomendasi Personal untuk Anda</span>
+                <span class="text-sm font-medium"> Rekomendasi Personal untuk Anda</span>
             </div>
 
             
@@ -64,8 +64,8 @@
             </div>
 
             <div class="flex gap-3 flex-wrap">
-                <button id="priceAsc" class="chip" value="asc">💰 Harga: Rendah ke Tinggi</button>
-                <button id="priceDesc" class="chip" value = "desc">💎 Harga: Tinggi ke Rendah</button>
+                <button id="priceAsc" class="chip" value="asc"> Harga: Rendah ke Tinggi</button>
+                <button id="priceDesc" class="chip" value = "desc"> Harga: Tinggi ke Rendah</button>
         
             </div>
         </div>
@@ -78,7 +78,7 @@
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-2xl font-bold text-gray-800">Produk Rekomendasi</h2>
             <button id="showAllProducts" type="button" class="text-pink-500 hover:text-pink-600 font-medium transition-colors" value="all">
-                Lihat Semua <i class="fa-solid fa-arrow-right"></i>
+                Lihat Semua Produk <i class="fa-solid fa-arrow-right"></i>
             </button>
     </div>
 

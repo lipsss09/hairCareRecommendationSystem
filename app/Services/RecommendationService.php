@@ -14,11 +14,7 @@ class RecommendationService
      * Batas harga per kategori budget.
      * Sesuaikan dengan rentang harga dataset kamu.
      */
-    private const BUDGET_RANGE = [
-        'terjangkau' => [0, 199999],
-        'medium'     => [200000, 499999],
-        'premium'    => [500000, PHP_INT_MAX],
-    ];
+
 
     /**
      * Entry point utama.
@@ -40,11 +36,54 @@ class RecommendationService
         // Cache key unik per kombinasi masalah + budget
         // sehingga kombinasi yang sama tidak dihitung ulang
         $cacheKey = 'recommendation_' . implode('_', $problemIds->sort()->values()->toArray())
-                    . '_' . $assessment->budget;
+                    . '_' . $assessment;
 
         return Cache::remember($cacheKey, now()->addHours(6), function () use ($problemIds, $assessment, $topN) {
-            return $this->compute($problemIds, $assessment->budget, $topN);
+            return $this->compute($problemIds, $topN);
         });
+    }
+
+    /**
+     * Rekomendasikan produk beserta evaluasi metrik.
+     * Mengembalikan array ['recommendations' => Collection, 'evaluation' => array]
+     */
+    public function recommendWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.6): array
+    {
+        $problemIds = $this->resolveProblemIds($assessment);
+
+        if ($problemIds->isEmpty()) {
+            return [
+                'recommendations' => collect(),
+                'evaluation' => [
+                    'precision_at_k' => 0,
+                    'recall_at_k'    => 0,
+                    'f1_score'       => 0,
+                    'k'              => $topN,
+                    'threshold'      => $threshold,
+                    'relevant_in_topk'  => 0,
+                    'total_relevant'    => 0,
+                    'total_products'    => 0,
+                ],
+            ];
+        }
+
+        // Hitung semua skor produk (tanpa limit)
+        $allScored = $this->computeAll($problemIds);
+
+        // Ambil top-K rekomendasi
+        $recommendations = $allScored
+            ->filter(fn($p) => $p->similarity_score > 0)
+            ->sortByDesc('similarity_score')
+            ->take($topN)
+            ->values();
+
+        // Hitung evaluasi
+        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);
+
+        return [
+            'recommendations' => $recommendations,
+            'evaluation'      => $evaluation,
+        ];
     }
 
     /**
@@ -53,7 +92,46 @@ class RecommendationService
     public function computeFresh(HairAssessment $assessment, int $topN = 10): Collection
     {
         $problemIds = $this->resolveProblemIds($assessment);
-        return $this->compute($problemIds, $assessment->budget, $topN);
+        return $this->compute($problemIds,  $topN);
+    }
+
+    /**
+     * Hitung ulang tanpa cache, beserta evaluasi.
+     */
+    public function computeFreshWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.6): array
+    {
+        $problemIds = $this->resolveProblemIds($assessment);
+
+        if ($problemIds->isEmpty()) {
+            return [
+                'recommendations' => collect(),
+                'evaluation' => [
+                    'precision_at_k' => 0,
+                    'recall_at_k'    => 0,
+                    'f1_score'       => 0,
+                    'k'              => $topN,
+                    'threshold'      => $threshold,
+                    'relevant_in_topk'  => 0,
+                    'total_relevant'    => 0,
+                    'total_products'    => 0,
+                ],
+            ];
+        }
+
+        $allScored = $this->computeAll($problemIds);
+
+        $recommendations = $allScored
+            ->filter(fn($p) => $p->similarity_score > 0)
+            ->sortByDesc('similarity_score')
+            ->take($topN)
+            ->values();
+
+        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);
+
+        return [
+            'recommendations' => $recommendations,
+            'evaluation'      => $evaluation,
+        ];
     }
 
     // ---------------------------------------------------------------
@@ -90,10 +168,22 @@ class RecommendationService
     /**
      * Inti perhitungan weighted cosine similarity.
      */
-    private function compute(Collection $problemIds, string $budget, int $topN): Collection
+    private function compute(Collection $problemIds,  int $topN): Collection
+    {
+        return $this->computeAll($problemIds)
+            ->filter(fn($p) => $p->similarity_score > 0)
+            ->sortByDesc('similarity_score')
+            ->take($topN)
+            ->values();
+    }
+
+    /**
+     * Hitung similarity score untuk SEMUA produk (tanpa filter/limit).
+     * Digunakan oleh compute() dan evaluate().
+     */
+    private function computeAll(Collection $problemIds): Collection
     {
         // Step 1: Bangun vektor Q
-        // Format: [ 'nama ingredient lowercase' => priority (1|2|3) ]
         $vectorQ = $this->buildQueryVector($problemIds);
 
         if (empty($vectorQ)) {
@@ -104,10 +194,10 @@ class RecommendationService
         $magnitudeQ = sqrt(array_sum(array_map(fn($q) => $q * $q, $vectorQ)));
 
         // Step 2: Ambil semua produk + key_ingredients dalam 1 query
-        $products = $this->fetchProducts($budget);
+        $products = $this->fetchProducts();
 
         // Step 3: Hitung similarity tiap produk
-        $scored = $products->map(function (Products $product) use ($vectorQ, $magnitudeQ) {
+        return $products->map(function (Products $product) use ($vectorQ, $magnitudeQ) {
             [$score, $matchedIngredients] = $this->cosineSimilarity($product, $vectorQ, $magnitudeQ);
 
             $product->similarity_score    = round($score, 4);
@@ -115,14 +205,52 @@ class RecommendationService
 
             return $product;
         });
+    }
 
-        // Step 4: Filter produk yang memiliki minimal 1 bahan cocok,
-        // urutkan dari similarity tertinggi, ambil top N
-        return $scored
-            ->filter(fn($p) => $p->similarity_score > 0)
-            ->sortByDesc('similarity_score')
-            ->take($topN)
-            ->values();
+    /**
+     * Evaluasi hasil rekomendasi menggunakan Precision@K, Recall@K, dan F1-Score.
+     *
+     * Ground truth: produk dianggap relevan jika similarity_score >= threshold.
+     *
+     * Precision@K = Relevant items in Top-K / K
+     * Recall@K    = Relevant items in Top-K / Total relevant items
+     * F1-Score    = 2 × (Precision@K × Recall@K) / (Precision@K + Recall@K)
+     */
+    private function evaluate(Collection $topK, Collection $allScored, int $k, float $threshold): array
+    {
+        // Hitung jumlah produk relevan di top-K (similarity_score >= threshold)
+        $relevantInTopK = $topK->filter(fn($p) => $p->similarity_score >= $threshold)->count();
+
+        // Hitung TOTAL produk relevan di seluruh database
+        $totalRelevant = $allScored->filter(fn($p) => $p->similarity_score >= $threshold)->count();
+
+        // Total produk yang dinilai
+        $totalProducts = $allScored->count();
+
+        // K yang digunakan (bisa lebih kecil dari topN jika produk yang ada kurang)
+        $actualK = $topK->count();
+
+        // Precision@K = Relevant items in Top-K / K
+        $precisionAtK = $actualK > 0 ? $relevantInTopK / $actualK : 0;
+
+        // Recall@K = Relevant items in Top-K / Total relevant items
+        $recallAtK = $totalRelevant > 0 ? $relevantInTopK / $totalRelevant : 0;
+
+        // F1-Score = 2 × (Precision × Recall) / (Precision + Recall)
+        $f1Score = ($precisionAtK + $recallAtK) > 0
+            ? 2 * ($precisionAtK * $recallAtK) / ($precisionAtK + $recallAtK)
+            : 0;
+
+        return [
+            'precision_at_k'    => round($precisionAtK, 4),
+            'recall_at_k'       => round($recallAtK, 4),
+            'f1_score'          => round($f1Score, 4),
+            'k'                 => $actualK,
+            'threshold'         => $threshold,
+            'relevant_in_topk'  => $relevantInTopK,
+            'total_relevant'    => $totalRelevant,
+            'total_products'    => $totalProducts,
+        ];
     }
 
     /**
@@ -155,12 +283,11 @@ class RecommendationService
      * Ambil semua produk, filter berdasarkan budget.
      * Eager-load category agar tidak ada N+1.
      */
-    private function fetchProducts(string $budget): Collection
+    private function fetchProducts(): Collection
     {
-        [$min, $max] = self::BUDGET_RANGE[$budget] ?? [0, PHP_INT_MAX];
+       
 
         return Products::with('category')
-            ->whereBetween('price', [$min, $max])
             ->get();
     }
 
@@ -187,7 +314,8 @@ class RecommendationService
     private function cosineSimilarity(Products $product, array $vectorQ, float $magnitudeQ): array
     {
         // Parse key_ingredients produk dari JSON string
-        $keyIngredients = $this->parseFullIngredients($product->ingredients);
+        $keyIngredients = $this->parseKeyIngredients($product->key_ingredients);
+        //dd($keyIngredients);
 
         if (empty($keyIngredients)) {
             return [0.0, []];
@@ -227,18 +355,39 @@ class RecommendationService
      * Contoh input: '["Piroctone Olamine", "Glycerin"]'
      * Output: ['piroctone olamine', 'glycerin']
      */
+   /**
+     * Parse kolom key_ingredients ke array lowercase.
+     * Mampu menangani format JSON standar maupun representasi string array Python (contoh: "['bahan a', 'bahan b']")
+     */
     private function parseKeyIngredients(?string $raw): array
     {
         if (empty($raw)) {
             return [];
         }
 
+        // 1. Coba decode secara standar dulu (berjaga-jaga jika ada data yang memang JSON valid)
         $decoded = json_decode($raw, true);
 
+        // 2. Jika gagal di-decode (karena bukan JSON standar, misal pakai kutip tunggal)
         if (! is_array($decoded)) {
-            return [];
+            // Bersihkan string dari kurung siku di awal/akhir
+            $cleanString = trim($raw, "[] \t\n\r\0\x0B"); 
+            
+            // Hapus semua tanda kutip tunggal maupun ganda
+            $cleanString = str_replace(["'", '"'], "", $cleanString); 
+            
+            // Pecah menjadi array berdasarkan tanda koma
+            $decoded = explode(',', $cleanString);
+            
+            // Buang elemen array yang kosong (misal akibat ada koma ganda berlebih)
+            $decoded = array_filter($decoded, fn($val) => trim($val) !== '');
         }
 
-        return array_map(fn($s) => strtolower(trim($s)), $decoded);
+        // 3. Pastikan hasil akhir dikembalikan dalam bentuk lowercase dan tidak ada spasi di awal/akhir kata
+        if (is_array($decoded) && !empty($decoded)) {
+            return array_map(fn($s) => strtolower(trim($s)), $decoded);
+        }
+
+        return [];
     }
 }

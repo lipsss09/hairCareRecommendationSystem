@@ -111,53 +111,7 @@
                 </div>
 
                 <!-- Budget Section -->
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Berapa Budget Anda Untuk Produk Rambut ?</h2>
-                    <div class="space-y-3">
-                        <label class="cursor-pointer block">
-                            <input type="radio" name="budget" value="terjangkau" class="hidden peer"
-                                {{ old('budget') == 'terjangkau' ? 'checked' : '' }} >
-                            <div class="px-6 py-4 bg-pink-50 rounded-lg transition-all hover:bg-pink-100 peer-checked:bg-pink-200 peer-checked:border-2 peer-checked:border-pink-500">
-                                <p class="font-semibold text-gray-900">Rp 10.000 - 199.999</p>
-                                <p class="text-sm text-gray-600">Budget Terjangkau</p>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer block">
-                            <input type="radio" name="budget" value="medium" class="hidden peer"
-                                {{ old('budget') == 'medium' ? 'checked' : '' }} >
-                            <div class="px-6 py-4 bg-pink-50 rounded-lg transition-all hover:bg-pink-100 peer-checked:bg-pink-200 peer-checked:border-2 peer-checked:border-pink-500">
-                                <p class="font-semibold text-gray-900">Rp 200.000 - 499.999</p>
-                                <p class="text-sm text-gray-600">Budget Medium</p>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer block">
-                            <input type="radio" name="budget" value="premium" class="hidden peer"
-                                {{ old('budget') == 'premium' ? 'checked' : '' }} >
-                            <div class="px-6 py-4 bg-pink-50 rounded-lg transition-all hover:bg-pink-100 peer-checked:bg-pink-200 peer-checked:border-2 peer-checked:border-pink-500">
-                                <p class="font-semibold text-gray-900">Rp 500.000 - 1.000.000</p>
-                                <p class="text-sm text-gray-600">Budget Premium</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Direct Recommendation Section -->
-            <div class="bg-pink-100 rounded-lg p-6">
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Rekomendasi Langsung :</h3>
-                <div class="flex flex-wrap gap-3">
-                    <a href="" class="px-6 py-3 bg-pink-300 hover:bg-pink-400 rounded-full font-medium text-gray-800 transition-all">
-                        Untuk Rambut Berminyak
-                    </a>
-                    <a href="" class="px-6 py-3 bg-pink-300 hover:bg-pink-400 rounded-full font-medium text-gray-800 transition-all">
-                        Untuk Rambut Kering
-                    </a>
-                    <a href="" class="px-6 py-3 bg-pink-300 hover:bg-pink-400 rounded-full font-medium text-gray-800 transition-all">
-                        Untuk Rambut Rontok
-                    </a>
-                    <a href="" class="px-6 py-3 bg-pink-300 hover:bg-pink-400 rounded-full font-medium text-gray-800 transition-all">
-                        Untuk Rambut Normal
-                    </a>
+        
                 </div>
             </div>
 
