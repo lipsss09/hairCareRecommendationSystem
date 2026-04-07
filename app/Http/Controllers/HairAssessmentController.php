@@ -33,21 +33,21 @@ class HairAssessmentController extends Controller
             'scalp_condition.*' => 'exists:scalp_conditions,id',
             'hair_problem'      => 'required|array|min:1',
             'hair_problem.*'    => 'exists:hair_problems,id',
-            'budget'            => 'required|in:terjangkau,medium,premium',
+          
         ], [
             'hair_type.required'       => 'Silakan pilih tipe rambut Anda.',
             'scalp_condition.required' => 'Silakan pilih minimal satu kondisi kulit kepala.',
             'scalp_condition.min'      => 'Silakan pilih minimal satu kondisi kulit kepala.',
             'hair_problem.required'    => 'Silakan pilih minimal satu masalah rambut.',
             'hair_problem.min'         => 'Silakan pilih minimal satu masalah rambut.',
-            'budget.required'          => 'Silakan pilih budget Anda.',
+        
         ]);
 
         // Simpan hair assessment utama
         $assessment = HairAssessment::create([
             'user_id'  => Auth::id(),
             'hair_type' => $request->hair_type,
-            'budget'    => $request->budget,
+           
         ]);
         $now = now();
         // Simpan ke pivot table scalp conditions

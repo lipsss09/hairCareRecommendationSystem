@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\ProsesController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RecommendationController;
 
 use App\Http\Controllers\HairAssessmentController;
 Route::get('/', function () {
@@ -45,6 +46,9 @@ Route::middleware(['auth'])->group(function () {
      Route::get('/cart', [CartController::class , 'index'])->name('cart.index');
      Route::post('/cart', [CartController::class , 'store'])->name('cart.store');
      Route::delete('/cart/{id}', [CartController::class , 'destroy'])->name('cart.destroy');
+         // Rekomendasi
+    Route::get('/recommendation/{assessment}', [RecommendationController::class, 'show'])
+        ->name('recommendation.show');
 });
 
 // ==================== ADMIN ROUTES ====================
