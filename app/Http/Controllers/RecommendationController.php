@@ -45,4 +45,17 @@ class RecommendationController extends Controller
         ]);
     }
 
+    /**
+     * Tampilkan history rekomendasi (Evaluasi) untuk user saat ini.
+     * Route: GET /evaluasi
+     */
+    public function history()
+    {
+        $assessments = auth()->user()->hairAssessments()
+                             ->with(['hairProblems', 'scalpConditions'])
+                             ->latest()
+                             ->get();
+
+        return view('recommendations.history', compact('assessments'));
+    }
 }

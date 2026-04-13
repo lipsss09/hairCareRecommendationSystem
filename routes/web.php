@@ -26,6 +26,10 @@ Route::post('/logout', [AuthController::class , 'logout']);
 
 Route::get('/get-products', [ProsesController::class , 'filterProducts'])->name('products.filter');
 
+Route::get('/tentang', function () {
+    return view('content.tentang');
+})->name('tentang');
+
 
 Route::get('/dashboard', [ContentController::class , 'dashboard'])->middleware('auth')->name('dashboard');
 // ✅ Ganti jadi ini
@@ -49,6 +53,10 @@ Route::middleware(['auth'])->group(function () {
          // Rekomendasi
     Route::get('/recommendation/{assessment}', [RecommendationController::class, 'show'])
         ->name('recommendation.show');
+
+    // Evaluasi (History Rekomendasi)
+    Route::get('/evaluasi', [RecommendationController::class, 'history'])
+        ->name('evaluasi.index');
 });
 
 // ==================== ADMIN ROUTES ====================

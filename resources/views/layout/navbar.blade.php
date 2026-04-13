@@ -16,11 +16,10 @@
 
         <!-- MIDDLE: Menu -->
         <div class="hidden md:flex gap-8 text-gray-700 font-medium">
-            <a href="/dashboard" class="hover:text-pink-600">Beranda</a>
-            <a href="/permasalahan" class="hover:text-pink-600">Permasalahan</a>
-            <a href="#" class="hover:text-pink-600">Rekomendasi</a>
-            <a href="#" class="hover:text-pink-600">Tentang</a>
-            <a href="#" class="hover:text-pink-600">Kontak</a>
+            <a href="{{ route('dashboard') }}" class="hover:text-pink-600">Beranda</a>
+            <a href="{{ route('permasalahan') }}" class="hover:text-pink-600">Permasalahan</a>
+            <a href="{{ route('evaluasi.index') }}" class="hover:text-pink-600">Evaluasi</a>
+            <a href="{{ route('tentang') }}" class="hover:text-pink-600">Tentang</a>
         </div>
 
         <!-- RIGHT SIDE -->
@@ -73,10 +72,9 @@
                         </button>
 
 
-                        <a href="#"
+                        <a href="{{ route('evaluasi.index') }}"
                             class="flex items-center gap-2 bg-gray-100 hover:bg-pink-100 p-2 rounded-lg transition">
-                            <button type="button" id="recButton"></button>
-                            <i class="fa-solid fa-book text-pink-500"></i> Recommendation
+                            <i class="fa-solid fa-book text-pink-500"></i> Evaluasi
                         </a>
 
                         <form method="POST" action="/logout">
