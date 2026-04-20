@@ -9,7 +9,7 @@ class ProductSeeder extends Seeder
 {
     public function run(): void
     {
-        $file = database_path('seeders/data/haircare_dataset.csv');
+        $file = database_path('seeders/data/data_fix.csv');
         $csv = array_map(function ($line) {
     return str_getcsv($line, ',');
 }, file($file));
