@@ -90,21 +90,34 @@
             <!-- Two Column Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Hair Problem Section (Checkbox - dari database) -->
+                <style>
+                    .hair-problem-label input:checked ~ .hair-problem-pill {
+                        background-color: #fce7f3; /* bg-pink-200 */
+                    }
+                    .hair-problem-label input:checked ~ .hair-problem-pill .radio-outer {
+                        border-color: #ec4899; /* border-pink-500 */
+                    }
+                    .hair-problem-label input:checked ~ .hair-problem-pill .radio-dot {
+                        background-color: #000000;
+                    }
+                </style>
                 <div>
                     <h2 class="text-2xl font-semibold text-gray-900 mb-2">Apa Masalah Yang Sedang Rambut Anda Hadapi ?</h2>
                     <p class="text-sm text-gray-500 mb-4">Boleh pilih lebih dari satu</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-3 ">
                         @foreach ($hairProblems as $problem)
-                            <label class="flex items-center cursor-pointer ">
+                            <label class="hair-problem-label flex items-center cursor-pointer">
                                 <input type="checkbox"
                                        name="hair_problem[]"
                                        value="{{ $problem->id }}"
-                                       class="hidden peer "
+                                       class="hidden"
                                        {{ in_array($problem->id, old('hair_problem', [])) ? 'checked' : '' }}>
-                                <div class="w-full px-5 py-3 bg-pink-50 rounded-full font-medium text-gray-700 transition-all hover:bg-pink-100 peer-checked:bg-pink-200 flex items-center">
-                                    <span class="w-5 h-5 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 peer-checked:border-pink-500 peer-checked:bg-pink-500"></span>
+                                <span class="hair-problem-pill w-full px-5 py-3 bg-pink-50 rounded-full font-medium text-gray-700 transition-all hover:bg-pink-100 flex items-center">
+                                    <span class="radio-outer w-5 h-5 rounded-full border-2 border-gray-400 mr-3 flex-shrink-0 flex items-center justify-center transition-all">
+                                        <span class="radio-dot w-2.5 h-2.5 rounded-full transition-all"></span>
+                                    </span>
                                     {{ $problem->name }}
-                                </div>
+                                </span> 
                             </label>
                         @endforeach
                     </div>
