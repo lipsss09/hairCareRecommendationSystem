@@ -29,7 +29,7 @@ class ProsesController extends Controller
 
     // Default limit
     if($filter ==='all'){
-        $query->limit(300); // Atau sesuaikan dengan jumlah total produk
+        $query->limit(500); // Atau sesuaikan dengan jumlah total produk
     } else {
         $query->limit(8);
     }
