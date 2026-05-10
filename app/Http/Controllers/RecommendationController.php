@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\HairAssessment;
 use App\Services\RecommendationService;
 use Illuminate\Http\Request;
@@ -25,6 +26,7 @@ class RecommendationController extends Controller
             'assessment'      => $assessment->load(['hairProblems', 'scalpConditions']),
             'recommendations' => $result['recommendations'],
             'evaluation'      => $result['evaluation'],
+            'categories'      => Categories::all(),
         ]);
     }
 
@@ -42,6 +44,7 @@ class RecommendationController extends Controller
             'assessment'      => $assessment->load(['hairProblems', 'scalpConditions']),
             'recommendations' => $result['recommendations'],
             'evaluation'      => $result['evaluation'],
+            'categories'      => Categories::all(),
         ]);
     }
 

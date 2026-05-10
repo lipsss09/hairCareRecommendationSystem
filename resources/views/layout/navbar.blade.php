@@ -18,7 +18,7 @@
         <div class="hidden md:flex gap-8 text-gray-700 font-medium">
             <a href="{{ route('dashboard') }}" class="hover:text-pink-600">Beranda</a>
             <a href="{{ route('permasalahan') }}" class="hover:text-pink-600">Permasalahan</a>
-            <a href="{{ route('evaluasi.index') }}" class="hover:text-pink-600">Evaluasi</a>
+            <a href="{{ route('evaluasi.index') }}" class="hover:text-pink-600">Riwayat Rekomendasi</a>
             <a href="{{ route('tentang') }}" class="hover:text-pink-600">Tentang</a>
         </div>
 

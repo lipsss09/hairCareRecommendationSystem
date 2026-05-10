@@ -32,6 +32,45 @@
         </div>
     </div>
 
+    {{-- FILTER SECTION --}}
+    <div class="mb-6 bg-gradient-to-r from-purple-50 to-white rounded-2xl p-5 shadow-sm border border-purple-100">
+        <div class="bg-white rounded-xl shadow-sm p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fa fa-filter text-purple-500"></i>
+                <span class="text-gray-800 font-bold text-base">Filter Produk</span>
+                <select class="bg-purple-500/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-medium text-purple-700 border border-purple-300/30 outline-none cursor-pointer" id="rec-categories">
+                    <option value="">Semua Kategori</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="border-t pt-4">
+                <div class="flex items-center gap-2 text-gray-700 font-semibold mb-3">
+                    <i class="fa fa-sort text-purple-500"></i> Urutkan Berdasarkan
+                </div>
+                <div class="flex gap-3 flex-wrap">
+                    <button id="recSortScoreDesc" class="px-4 py-1.5 rounded-full text-sm font-medium border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors cursor-pointer">
+                        Kecocokan: Tertinggi
+                    </button>
+                    <button id="recSortScoreAsc" class="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
+                        Kecocokan: Terendah
+                    </button>
+                    <button id="recSortPriceAsc" class="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
+                        Harga: Rendah ke Tinggi
+                    </button>
+                    <button id="recSortPriceDesc" class="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer">
+                        Harga: Tinggi ke Rendah
+                    </button>
+                    <button id="recResetFilter" class="px-4 py-1.5 rounded-full text-sm font-medium border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 transition-colors cursor-pointer">
+                        <i class="fa fa-times mr-1"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Hasil rekomendasi --}}
     @if($recommendations->isEmpty())
         <div class="text-center py-20">
@@ -44,16 +83,19 @@
             </a>
         </div>
     @else
-        <p class="text-sm text-gray-400 mb-5">
+        <p class="text-sm text-gray-400 mb-5 rec-count-text">
             Menampilkan <span class="font-medium text-gray-600">{{ $recommendations->count() }} produk</span> paling relevan
         </p>
 
-        <div class="space-y-4">
+        <div id="rec-container" class="space-y-4">
             @foreach($recommendations as $rank => $product)
-            <div class="bg-white border border-gray-200 rounded-xl p-5 flex gap-4 hover:shadow-md hover:border-purple-200 transition-all">
+            <div class="rec-card bg-white border border-gray-200 rounded-xl p-5 flex gap-4 hover:shadow-md hover:border-purple-200 transition-all"
+                 data-category-id="{{ $product->category_id }}"
+                 data-price="{{ $product->price }}"
+                 data-score="{{ $product->similarity_score }}">
 
                 {{-- Rank --}}
-                <div class="flex-shrink-0 w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold">
+                <div class="rank-badge flex-shrink-0 w-7 h-7 rounded-full bg-purple-600 text-white flex items-center justify-center text-xs font-bold">
                     {{ $rank + 1 }}
                 </div>
 
@@ -320,3 +362,124 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var categorySelect = document.getElementById('rec-categories');
+    var cards = Array.from(document.querySelectorAll('.rec-card'));
+    var container = document.getElementById('rec-container');
+    var sortButtons = {
+        scoreDesc: document.getElementById('recSortScoreDesc'),
+        scoreAsc: document.getElementById('recSortScoreAsc'),
+        priceAsc: document.getElementById('recSortPriceAsc'),
+        priceDesc: document.getElementById('recSortPriceDesc'),
+    };
+    var resetBtn = document.getElementById('recResetFilter');
+
+    if (!container || cards.length === 0) return;
+
+    var activeSort = 'scoreDesc';
+
+    function setActiveButton(activeKey) {
+        Object.entries(sortButtons).forEach(function(entry) {
+            var key = entry[0], btn = entry[1];
+            if (!btn) return;
+            if (key === activeKey) {
+                btn.classList.remove('border-gray-200', 'bg-gray-50', 'text-gray-600');
+                btn.classList.add('border-purple-200', 'bg-purple-50', 'text-purple-700');
+            } else {
+                btn.classList.remove('border-purple-200', 'bg-purple-50', 'text-purple-700');
+                btn.classList.add('border-gray-200', 'bg-gray-50', 'text-gray-600');
+            }
+        });
+    }
+
+    function applyFilter() {
+        var selectedCategory = categorySelect ? categorySelect.value : '';
+
+        // 1) Filter: determine which cards are visible
+        var visibleCards = [];
+        cards.forEach(function(card) {
+            var catId = card.getAttribute('data-category-id');
+            if (!selectedCategory || catId === selectedCategory) {
+                card.style.display = 'flex';
+                visibleCards.push(card);
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // 2) Sort visible cards
+        visibleCards.sort(function(a, b) {
+            switch (activeSort) {
+                case 'scoreDesc':
+                    return parseFloat(b.dataset.score) - parseFloat(a.dataset.score);
+                case 'scoreAsc':
+                    return parseFloat(a.dataset.score) - parseFloat(b.dataset.score);
+                case 'priceAsc':
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                case 'priceDesc':
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                default:
+                    return 0;
+            }
+        });
+
+        // 3) Re-order DOM: append visible first, then hidden
+        visibleCards.forEach(function(card) {
+            container.appendChild(card);
+            // Reset any anime.js animation styles
+            card.style.opacity = '1';
+            card.style.transform = 'none';
+        });
+        cards.forEach(function(card) {
+            if (card.style.display === 'none') {
+                container.appendChild(card);
+            }
+        });
+
+        // 4) Update rank numbers
+        visibleCards.forEach(function(card, index) {
+            var rankEl = card.querySelector('.rank-badge');
+            if (rankEl) rankEl.textContent = index + 1;
+        });
+
+        // 5) Update count text
+        var countWrapper = document.querySelector('.rec-count-text');
+        if (countWrapper) {
+            countWrapper.innerHTML = 'Menampilkan <span class="font-medium text-gray-600">' + visibleCards.length + ' produk</span> paling relevan';
+        }
+    }
+
+    // Category filter
+    if (categorySelect) {
+        categorySelect.addEventListener('change', applyFilter);
+    }
+
+    // Sort buttons
+    Object.entries(sortButtons).forEach(function(entry) {
+        var key = entry[0], btn = entry[1];
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+            activeSort = key;
+            setActiveButton(key);
+            applyFilter();
+        });
+    });
+
+    // Reset
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            if (categorySelect) categorySelect.value = '';
+            activeSort = 'scoreDesc';
+            setActiveButton('scoreDesc');
+            applyFilter();
+        });
+    }
+
+    // Initial state
+    setActiveButton('scoreDesc');
+});
+</script>
+@endpush

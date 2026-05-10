@@ -32,11 +32,6 @@
                 Dapatkan rekomendasi produk yang sesuai dengan jenis dan kondisi rambut Anda
             </p>
 
-            <div class="flex items-center bg-white/95 backdrop-blur-md rounded-full px-5 py-3 w-full max-w-md shadow-[0_10px_40px_rgba(0,0,0,0.4)] hover:shadow-[0_15px_50px_rgba(236,72,153,0.5)] transition-all duration-300 hover:scale-[1.02]">
-                <i class="fa-solid fa-magnifying-glass text-pink-500 mr-3 text-lg"></i>
-                <input type="text" placeholder="Cari produk perawatan rambut..."
-                       class="outline-none w-full text-gray-700 bg-transparent placeholder:text-gray-400">
-            </div>
         </div>
     </div>
 </section>
