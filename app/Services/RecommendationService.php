@@ -12,18 +12,18 @@ class RecommendationService
 {
     /**
      * Batas maksimal priority boost agar skor tidak meledak.
-     * Nilai 0.3 artinya skor cosine bisa naik maksimal 30%.
+     * Nilai 0.4 artinya skor cosine bisa naik maksimal 40%.
      */
-    private const MAX_PRIORITY_BOOST = 0.3;
+    // private const MAX_PRIORITY_BOOST = 0.4;
 
-    /**
-     * Boost per bahan yang cocok berdasarkan priority.
-     */
-    private const BOOST_PER_PRIORITY = [
-        3 => 0.2, // +5% per bahan priority 3
-        2 => 0.1, // +2% per bahan priority 2
-        1 => 0.00, // tidak ada boost untuk priority 1
-    ];
+    // /**
+    //  * Boost per bahan yang cocok berdasarkan priority.
+    //  */
+    // private const BOOST_PER_PRIORITY = [
+    //     3 => 0.2, // +5% per bahan priority 3
+    //     2 => 0.1, // +2% per bahan priority 2
+    //     1 => 0.00, // tidak ada boost untuk priority 1
+    // ];
 
     // ---------------------------------------------------------------
     // PUBLIC METHODS
@@ -32,37 +32,37 @@ class RecommendationService
     /**
      * Entry point utama dengan cache.
      */
-    public function recommend(HairAssessment $assessment, int $topN = 10): Collection
-    {
-        $problemIds = $this->resolveProblemIds($assessment);
+    // public function recommend(HairAssessment $assessment, int $topN = 10): Collection
+    // {
+    //     $problemIds = $this->resolveProblemIds($assessment);
 
-        if ($problemIds->isEmpty()) {
-            return collect();
-        }
+    //     if ($problemIds->isEmpty()) {
+    //         return collect();
+    //     }
 
-        // FIX #1: gunakan $assessment->budget bukan $assessment (object tidak bisa jadi string)
-        $cacheKey = 'recommendation_'
-            . implode('_', $problemIds->sort()->values()->toArray())
-            . '_' . $assessment;
+    //     // FIX #1: gunakan $assessment->budget bukan $assessment (object tidak bisa jadi string)
+    //     $cacheKey = 'recommendation_'
+    //         . implode('_', $problemIds->sort()->values()->toArray())
+    //         . '_' . $assessment;
 
-        return Cache::remember($cacheKey, now()->addHours(6), function () use ($problemIds, $topN) {
-            return $this->compute($problemIds, $topN);
-        });
-    }
+    //     return Cache::remember($cacheKey, now()->addHours(6), function () use ($problemIds, $topN) {
+    //         return $this->compute($problemIds, $topN);
+    //     });
+    // }
 
     /**
      * Rekomendasikan produk beserta evaluasi metrik.
      * Mengembalikan array ['recommendations' => Collection, 'evaluation' => array]
      */
-    public function recommendWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.3): array
+    public function recommendWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.6): array
     {
-        $problemIds = $this->resolveProblemIds($assessment);
+        $problemIds = $this->resolveProblemIds($assessment);//pencarian id masalah rambut dan kulit 
 
         if ($problemIds->isEmpty()) {
             return $this->emptyEvaluationResult($topN, $threshold);
         }
 
-        $allScored = $this->computeAll($problemIds);
+        $allScored = $this->computeAll($problemIds);//hitung similarity untuk semua produk
 
         $recommendations = $allScored
             ->filter(fn($p) => $p->similarity_score > 0)
@@ -70,7 +70,7 @@ class RecommendationService
             ->take($topN)
             ->values();
 
-        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);
+        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);//evaluasi 
 
         return [
             'recommendations' => $recommendations,
@@ -90,7 +90,7 @@ class RecommendationService
     /**
      * Hitung ulang tanpa cache, beserta evaluasi.
      */
-    public function computeFreshWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.3): array
+    public function computeFreshWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.4): array
     {
         $problemIds = $this->resolveProblemIds($assessment);
 
@@ -98,7 +98,7 @@ class RecommendationService
             return $this->emptyEvaluationResult($topN, $threshold);
         }
 
-        $allScored = $this->computeAll($problemIds);
+        $allScored = $this->computeAll($problemIds);//isinya similarity score dan kandungan produk yang sesuai
 
         $recommendations = $allScored
             ->filter(fn($p) => $p->similarity_score > 0)
@@ -125,56 +125,49 @@ class RecommendationService
     {
         $hairProblemIds = $assessment->hairProblems()->pluck('hair_problems.id');
 
-        $scalpToHairProblem = [
-            'Berminyak' => 3,
-            'Kering'    => 4,
-            'Iritasi'   => 13,
-        ];
+        // $scalpToHairProblem = [
+        //     'Berminyak' => 3,
+        //     'Kering'    => 4,
+        //     'Iritasi'   => 13,
+        // ];
 
         $scalpProblemIds = $assessment->scalpConditions()
             ->pluck('scalp_conditions.name')
             ->map(fn($name) => $scalpToHairProblem[$name] ?? null)
             ->filter();
 
-        return $hairProblemIds->merge($scalpProblemIds)->unique()->values();
+        return $hairProblemIds->merge($scalpProblemIds)->unique()->values();// penggabungan masalah rambut dan kulit kepala 
     }
 
-    /**
-     * Compute top-N produk.
-     */
-    private function compute(Collection $problemIds, int $topN): Collection
-    {
-        return $this->computeAll($problemIds)
-            ->filter(fn($p) => $p->similarity_score > 0)
-            ->sortByDesc('similarity_score')
-            ->take($topN)
-            ->values();
-    }
+    
 
     /**
      * Hitung similarity untuk SEMUA produk tanpa filter/limit.
      */
     private function computeAll(Collection $problemIds): Collection
-    {
-        $vectorQ = $this->buildQueryVector($problemIds);
+{
+    $vectorQ = $this->buildQueryVector($problemIds);
 
-        if (empty($vectorQ)) {
-            return collect();
-        }
-
-        $magnitudeQ = sqrt(array_sum(array_map(fn($q) => $q * $q, $vectorQ)));
-
-        $products = $this->fetchProducts();
-
-        return $products->map(function (Products $product) use ($vectorQ, $magnitudeQ) {
-            [$score, $matchedIngredients] = $this->cosineSimilarity($product, $vectorQ, $magnitudeQ);
-
-            $product->similarity_score    = round($score, 4);
-            $product->matched_ingredients = $matchedIngredients;
-
-            return $product;
-        });
+    if (empty($vectorQ)) {
+        return collect();
     }
+
+    $magnitudeQ = sqrt(array_sum(array_map(fn($q) => $q * $q, $vectorQ)));
+
+    // Ambil mapping ingredient → priority dari DB (untuk semua problem yang relevan)
+    $ingredientPriorityMap = $this->buildIngredientPriorityMap($problemIds);
+
+    $products = $this->fetchProducts();
+
+    return $products->map(function (Products $product) use ($vectorQ, $magnitudeQ, $ingredientPriorityMap) {
+        [$score, $matchedIngredients] = $this->cosineSimilarity($product, $vectorQ, $magnitudeQ, $ingredientPriorityMap);
+
+        $product->similarity_score    = round($score, 4);
+        $product->matched_ingredients = $matchedIngredients;
+
+        return $product;
+    });
+}
 
     /**
      * Evaluasi Precision@K, Recall@K, F1-Score.
@@ -211,9 +204,28 @@ class RecommendationService
     }
 
     /**
-     * Bangun vektor Q.
-     * Jika ingredient muncul di beberapa masalah → ambil priority tertinggi.
-     */
+ * Bangun map: ingredient_name → priority tertinggi dari semua problem yang relevan.
+ * Ini adalah "vector referensi" untuk matching dengan produk.
+ */
+private function buildIngredientPriorityMap(Collection $problemIds): array
+{
+    $rows = DB::table('problem_ingredient_map as pim')
+        ->join('ingredients as i', 'i.id', '=', 'pim.ingredient_id')
+        ->whereIn('pim.hair_problem_id', $problemIds)
+        ->select('i.name', 'pim.priority')
+        ->get();
+
+    $map = [];
+    foreach ($rows as $row) {
+        $name = strtolower(trim($row->name));
+        // Jika ingredient muncul di beberapa problem, ambil priority tertinggi
+        if (!isset($map[$name]) || $row->priority > $map[$name]) {
+            $map[$name] = (int) $row->priority;
+        }
+    }
+
+    return $map;
+}
     private function buildQueryVector(Collection $problemIds): array
     {
         $rows = DB::table('problem_ingredient_map as pim')
@@ -226,7 +238,7 @@ class RecommendationService
         foreach ($rows as $row) {
             $name = strtolower(trim($row->name));
             if (! isset($vector[$name]) || $row->priority > $vector[$name]) {
-                $vector[$name] = (int) $row->priority;
+                $vector[$name] = 3;
             }
         }
 
@@ -242,70 +254,58 @@ class RecommendationService
     }
 
     /**
-     * Hitung cosine similarity standar + priority boost yang dibatasi.
-     *
-     * Formula dasar:
-     *   cosine = Σ(Qᵢ × Pᵢ) / (|Q| × |P|)
-     *
-     * Priority Boost (teknik penyesuaian skor berbasis bobot kandungan):
-     *   boost = Σ BOOST_PER_PRIORITY[priority] per bahan yang cocok
-     *   boost dibatasi maksimal MAX_PRIORITY_BOOST
-     *
-     * Skor akhir:
-     *   score_final = min(cosine × (1 + boost), 1.0)
-     *
-     * Justifikasi: produk yang mengandung bahan aktif berprioritas tinggi
-     * secara klinis lebih direkomendasikan, sehingga layak mendapat
-     * penyesuaian skor positif yang proporsional dan terbatas.
-     *
-     * @return array [float $similarity, array $matchedIngredients]
-     */
-    private function cosineSimilarity(Products $product, array $vectorQ, float $magnitudeQ): array
-    {
-        // FIX #2: gunakan parseFullIngredients (full ingredient list)
-        // bukan parseKeyIngredients — lebih akurat karena mencakup semua bahan produk
-        $productIngredients = $this->parseKeyIngredients($product->key_ingredients);
+ * Cosine similarity yang benar:
+ * - vectorQ: semua ingredient relevan, nilai 3
+ * - vectorP: ingredient produk (dari key_ingredients) di-lookup ke ingredientPriorityMap
+ * - Dot product hanya dihitung jika ingredient ada di KEDUA vector
+ */
+private function cosineSimilarity(Products $product, array $vectorQ, float $magnitudeQ, array $ingredientPriorityMap): array
+{
+    $productIngredients = $this->parseKeyIngredients($product->key_ingredients);
 
-        if (empty($productIngredients)) {
-            return [0.0, []];
-        }
-
-        $dotProduct     = 0.0;
-        $magnitudePSq   = 0.0;
-        $matchedDetails = [];
-        $totalBoost     = 0.0;
-
-        foreach ($vectorQ as $ingName => $qPriority) {
-            $pValue = in_array($ingName, $productIngredients) ? $qPriority : 0;
-
-            $dotProduct   += $qPriority * $pValue;
-            $magnitudePSq += $pValue * $pValue;
-
-            if ($pValue > 0) {
-                $matchedDetails[] = [
-                    'ingredient' => $ingName,
-                    'priority'   => $qPriority,
-                ];
-
-                // Akumulasi boost — dibatasi MAX_PRIORITY_BOOST
-                $boostIncrement = self::BOOST_PER_PRIORITY[$qPriority] ?? 0;
-                $totalBoost     = min($totalBoost + $boostIncrement, self::MAX_PRIORITY_BOOST);
-            }
-        }
-
-        if ($magnitudeQ == 0 || $magnitudePSq == 0) {
-            return [0.0, []];
-        }
-
-        // Cosine similarity standar
-        $magnitudeP = sqrt($magnitudePSq);
-        $cosine     = $dotProduct / ($magnitudeQ * $magnitudeP);
-
-        // Terapkan priority boost yang sudah dibatasi
-        $similarity = $cosine * (1.0 + $totalBoost);
-
-        return [min($similarity, 1.0), $matchedDetails];
+    if (empty($productIngredients)) {
+        return [0.0, []];
     }
+
+    // Bangun vectorP: ingredient produk yang ada di mapping → pakai priority dari DB
+    $vectorP = [];
+    foreach ($productIngredients as $ingName) {
+        $name = strtolower(trim($ingName));
+        if (isset($ingredientPriorityMap[$name])) {
+            $vectorP[$name] = $ingredientPriorityMap[$name]; // priority dari DB
+        }
+    }
+
+    // Hitung dot product dan magnitude P
+    // Hanya ingredient yang ada di KEDUA vector yang berkontribusi ke dot product
+    $dotProduct     = 0.0;
+    $magnitudePSq   = 0.0;
+    $matchedDetails = [];
+
+    foreach ($vectorP as $ingName => $pPriority) {
+        $magnitudePSq += $pPriority * $pPriority;
+
+        if (isset($vectorQ[$ingName])) {
+            // Ingredient cocok → kontribusi ke dot product
+            $qPriority    = $vectorQ[$ingName]; // selalu 3
+            $dotProduct  += $qPriority * $pPriority;
+
+            $matchedDetails[] = [
+                'ingredient' => $ingName,
+                'priority'   => $pPriority,
+            ];
+        }
+    }
+
+    if ($magnitudeQ == 0 || $magnitudePSq == 0) {
+        return [0.0, []];
+    }
+
+    $magnitudeP = sqrt($magnitudePSq);
+    $cosine     = $dotProduct / ($magnitudeQ * $magnitudeP);
+
+    return [min(round($cosine, 4), 1.0), $matchedDetails];
+}
 
     /**
      * Parse kolom ingredients (full list) — dipisah koma.
