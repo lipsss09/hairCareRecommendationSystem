@@ -14,7 +14,7 @@ class RecommendationService
      * Batas maksimal priority boost agar skor tidak meledak.
      * Nilai 0.3 artinya skor cosine bisa naik maksimal 30%.
      */
-    private const MAX_PRIORITY_BOOST = 0.3;
+    private const MAX_PRIORITY_BOOST = 0.0;
 
     /**
      * Boost per bahan yang cocok berdasarkan priority.
@@ -241,6 +241,12 @@ class RecommendationService
         return Products::with('category')->get();
     }
 
+    $cc = $this->tambah(2, 3);
+
+
+    private function tambah($a,$b){
+        return $a+$b;
+    }
     /**
      * Hitung cosine similarity standar + priority boost yang dibatasi.
      *
@@ -262,8 +268,7 @@ class RecommendationService
      */
     private function cosineSimilarity(Products $product, array $vectorQ, float $magnitudeQ): array
     {
-        // FIX #2: gunakan parseFullIngredients (full ingredient list)
-        // bukan parseKeyIngredients — lebih akurat karena mencakup semua bahan produk
+
         $productIngredients = $this->parseKeyIngredients($product->key_ingredients);
 
         if (empty($productIngredients)) {
