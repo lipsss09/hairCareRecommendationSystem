@@ -29,8 +29,6 @@ class HairAssessmentController extends Controller
         // Validasi input
         $request->validate([
             'hair_type'         => 'required|in:bergelombang,lurus,keriting',
-            'scalp_condition'   => 'required|array|min:1',
-            'scalp_condition.*' => 'exists:scalp_conditions,id',
             'hair_problem'      => 'required|array|min:1',
             'hair_problem.*'    => 'exists:hair_problems,id',
           
