@@ -68,7 +68,7 @@
             </div>
 
             <!-- Scalp Condition Section (Checkbox - dari database) -->
-            <div>
+            <!-- <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-2">Bagaimana Kondisi Kulit Kepala Anda ?</h2>
                 <p class="text-sm text-gray-500 mb-4">Boleh pilih lebih dari satu</p>
                 <div class="flex flex-wrap gap-3">
@@ -85,7 +85,7 @@
                         </label>
                     @endforeach
                 </div>
-            </div>
+            </div> -->
 
             <!-- Two Column Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -102,7 +102,7 @@
                     }
                 </style>
                 <div>
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">Apa Masalah Yang Sedang Rambut Anda Hadapi ?</h2>
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-2">Apa Masalah Yang Sedang Rambut atau Kulit Kepala Anda Hadapi ?</h2>
                     <p class="text-sm text-gray-500 mb-4">Boleh pilih lebih dari satu</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-3 ">
                         @foreach ($hairProblems as $problem)
