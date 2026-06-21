@@ -52,30 +52,19 @@ class RecommendationService
 
     /**
      * Rekomendasikan produk beserta evaluasi metrik.
-     * Mengembalikan array ['recommendations' => Collection, 'evaluation' => array]
+     * Mengembalikan array ['recommendations' => Collection, 'evaluation' => array, 'has_feedback' => bool]
      */
     public function recommendWithEvaluation(HairAssessment $assessment, int $topN = 10, float $threshold = 0.6): array
     {
-        $problemIds = $this->resolveProblemIds($assessment);//pencarian id masalah rambut dan kulit 
+        $problemIds = $this->resolveProblemIds($assessment);
 
         if ($problemIds->isEmpty()) {
             return $this->emptyEvaluationResult($topN, $threshold);
         }
 
-        $allScored = $this->computeAll($problemIds);//hitung similarity untuk semua produk
+        $allScored = $this->computeAll($problemIds);
 
-        $recommendations = $allScored
-            ->filter(fn($p) => $p->similarity_score > 0)
-            ->sortByDesc('similarity_score')
-            ->take($topN)
-            ->values();
-
-        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);//evaluasi 
-
-        return [
-            'recommendations' => $recommendations,
-            'evaluation'      => $evaluation,
-        ];
+        return $this->resolveRecommendationsAndEvaluation($assessment, $allScored, $topN, $threshold);
     }
 
     /**
@@ -98,20 +87,9 @@ class RecommendationService
             return $this->emptyEvaluationResult($topN, $threshold);
         }
 
-        $allScored = $this->computeAll($problemIds);//isinya similarity score dan kandungan produk yang sesuai
+        $allScored = $this->computeAll($problemIds);
 
-        $recommendations = $allScored
-            ->filter(fn($p) => $p->similarity_score > 0)
-            ->sortByDesc('similarity_score')
-            ->take($topN)
-            ->values();
-
-        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);
-
-        return [
-            'recommendations' => $recommendations,
-            'evaluation'      => $evaluation,
-        ];
+        return $this->resolveRecommendationsAndEvaluation($assessment, $allScored, $topN, $threshold);
     }
 
     // ---------------------------------------------------------------
@@ -151,9 +129,10 @@ class RecommendationService
     if (empty($vectorQ)) {
         return collect();
     }
+    
 
     $magnitudeQ = sqrt(array_sum(array_map(fn($q) => $q * $q, $vectorQ)));
-
+    
     // Ambil mapping ingredient → priority dari DB (untuk semua problem yang relevan)
     $ingredientPriorityMap = $this->buildIngredientPriorityMap($problemIds);
 
@@ -183,6 +162,85 @@ class RecommendationService
         $totalRelevant  = $allScored->filter(fn($p) => $p->similarity_score >= $threshold)->count();
         $totalProducts  = $allScored->count();
         $actualK        = $topK->count();
+
+        $precisionAtK = $actualK > 0 ? $relevantInTopK / $actualK : 0;
+        $recallAtK    = $totalRelevant > 0 ? $relevantInTopK / $totalRelevant : 0;
+
+        $f1Score = ($precisionAtK + $recallAtK) > 0
+            ? 2 * ($precisionAtK * $recallAtK) / ($precisionAtK + $recallAtK)
+            : 0;
+
+        return [
+            'precision_at_k'   => round($precisionAtK, 4),
+            'recall_at_k'      => round($recallAtK, 4),
+            'f1_score'         => round($f1Score, 4),
+            'k'                => $actualK,
+            'threshold'        => $threshold,
+            'relevant_in_topk' => $relevantInTopK,
+            'total_relevant'   => $totalRelevant,
+            'total_products'   => $totalProducts,
+        ];
+    }
+
+    /**
+     * Selesaikan rekomendasi dan evaluasi berdasarkan ketersediaan feedback user.
+     */
+    private function resolveRecommendationsAndEvaluation(HairAssessment $assessment, Collection $allScored, int $topN, float $threshold): array
+    {
+        $feedbacks = $assessment->relevanceEvaluations;
+
+        if ($feedbacks && $feedbacks->isNotEmpty()) {
+            $productIds = $feedbacks->pluck('product_id')->toArray();
+            $feedbackMap = $feedbacks->pluck('is_relevant', 'product_id')->toArray();
+            $scoreMap = $feedbacks->pluck('similarity_score', 'product_id')->toArray();
+
+            $recommendations = Products::with('category')
+                ->whereIn('id', $productIds)
+                ->get()
+                ->map(function ($product) use ($scoreMap, $feedbackMap) {
+                    $product->similarity_score = (float) ($scoreMap[$product->id] ?? 0.0);
+                    $product->is_relevant = (bool) ($feedbackMap[$product->id] ?? false);
+                    return $product;
+                })
+                ->sortByDesc('similarity_score')
+                ->values();
+
+            $evaluation = $this->evaluateUserFeedback($recommendations, $allScored, $topN, $threshold);
+
+            return [
+                'recommendations' => $recommendations,
+                'evaluation'      => $evaluation,
+                'has_feedback'    => true,
+            ];
+        }
+
+        $recommendations = $allScored
+            ->filter(fn($p) => $p->similarity_score > 0)
+            ->sortByDesc('similarity_score')
+            ->take($topN)
+            ->values();
+
+        $evaluation = $this->evaluate($recommendations, $allScored, $topN, $threshold);
+
+        return [
+            'recommendations' => $recommendations,
+            'evaluation'      => $evaluation,
+            'has_feedback'    => false,
+        ];
+    }
+
+    /**
+     * Evaluasi Precision@K, Recall@K, F1-Score menggunakan feedback nyata dari user.
+     */
+    private function evaluateUserFeedback(Collection $topK, Collection $allScored, int $k, float $threshold): array
+    {
+        $relevantInTopK = $topK->filter(fn($p) => $p->is_relevant === true)->count();
+        $totalRelevantThreshold = $allScored->filter(fn($p) => $p->similarity_score >= $threshold)->count();
+        
+        // Sesuaikan total_relevant agar tidak kurang dari $relevantInTopK untuk mencegah Recall > 1.0
+        $totalRelevant = max($totalRelevantThreshold, $relevantInTopK);
+        $totalProducts = $allScored->count();
+        $actualK = $topK->count();
 
         $precisionAtK = $actualK > 0 ? $relevantInTopK / $actualK : 0;
         $recallAtK    = $totalRelevant > 0 ? $relevantInTopK / $totalRelevant : 0;
@@ -253,12 +311,7 @@ private function buildIngredientPriorityMap(Collection $problemIds): array
         return Products::with('category')->get();
     }
 
-    $cc = $this->tambah(2, 3);
 
-
-    private function tambah($a,$b){
-        return $a+$b;
-    }
     /**
  * Cosine similarity yang benar:
  * - vectorQ: semua ingredient relevan, nilai 3
@@ -287,6 +340,7 @@ private function cosineSimilarity(Products $product, array $vectorQ, float $magn
     $dotProduct     = 0.0;
     $magnitudePSq   = 0.0;
     $matchedDetails = [];
+    
 
     foreach ($vectorP as $ingName => $pPriority) {
         $magnitudePSq += $pPriority * $pPriority;
@@ -306,9 +360,13 @@ private function cosineSimilarity(Products $product, array $vectorQ, float $magn
     if ($magnitudeQ == 0 || $magnitudePSq == 0) {
         return [0.0, []];
     }
+    
+    
 
     $magnitudeP = sqrt($magnitudePSq);
+    
     $cosine     = $dotProduct / ($magnitudeQ * $magnitudeP);
+    // dd($magnitudeQ,$magnitudeQ,$dotProduct,$cosine);
 
     return [min(round($cosine, 4), 1.0), $matchedDetails];
 }

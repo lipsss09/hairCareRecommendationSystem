@@ -54,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/recommendation/{assessment}', [RecommendationController::class, 'show'])
         ->name('recommendation.show');
 
+    Route::post('/recommendation/{assessment}/evaluate', [RecommendationController::class, 'storeEvaluation'])
+        ->name('recommendation.evaluate');
+
     // Evaluasi (History Rekomendasi)
     Route::get('/evaluasi', [RecommendationController::class, 'history'])
         ->name('evaluasi.index');

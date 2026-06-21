@@ -50,4 +50,12 @@ class HairAssessment extends Model
             'hair_problem_id'
         );
     }
+
+    /**
+     * Relasi ke RelevanceEvaluation
+     */
+    public function relevanceEvaluations()
+    {
+        return $this->hasMany(RelevanceEvaluation::class, 'hair_assessment_id');
+    }
 }

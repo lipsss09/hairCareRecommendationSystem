@@ -7,8 +7,22 @@
 
     {{-- Flash message --}}
     @if(session('success'))
-        <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm">
+        <div class="mb-6 px-4 py-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm shadow-sm">
             {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm shadow-sm">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm shadow-sm">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -87,9 +101,14 @@
             Menampilkan <span class="font-medium text-gray-600">{{ $recommendations->count() }} produk</span> paling relevan
         </p>
 
+        @if(!$has_feedback)
+            <form action="{{ route('recommendation.evaluate', $assessment->id) }}" method="POST" id="evaluation-form">
+                @csrf
+        @endif
+
         <div id="rec-container" class="space-y-4">
             @foreach($recommendations as $rank => $product)
-            <div class="rec-card bg-white border border-gray-200 rounded-xl p-5 flex gap-4 hover:shadow-md hover:border-purple-200 transition-all"
+            <div class="rec-card bg-white border border-gray-200 rounded-xl p-5 flex flex-wrap sm:flex-nowrap gap-4 hover:shadow-md hover:border-purple-200 transition-all"
                  data-category-id="{{ $product->category_id }}"
                  data-price="{{ $product->price }}"
                  data-score="{{ $product->similarity_score }}">
@@ -170,16 +189,72 @@
                     @endif
 
                 </div>
+
+                {{-- Evaluasi Relevansi (Radio Buttons) --}}
+                <div class="flex-shrink-0 flex flex-row sm:flex-col justify-center items-center gap-2 pl-0 sm:pl-4 border-t pt-3 sm:border-t-0 sm:pt-0 sm:border-l border-gray-100 min-w-full sm:min-w-[125px] w-full sm:w-auto mt-2 sm:mt-0">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block sm:mb-1">Relevansi</span>
+                    <div class="flex flex-row sm:flex-col gap-2 w-full">
+                        {{-- Radio Relevan --}}
+                        <label class="inline-flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-purple-300 bg-gray-50/50 cursor-pointer transition-all w-full text-xs font-medium text-gray-700">
+                            <span class="flex items-center gap-1.5 font-semibold text-emerald-600">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Relevan
+                            </span>
+                            <input type="radio" 
+                                   name="relevance[{{ $product->id }}]" 
+                                   value="1" 
+                                   class="ml-2 w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 cursor-pointer"
+                                   {{ $has_feedback ? (($product->is_relevant ?? false) ? 'checked' : '') . ' disabled' : 'required' }}>
+                        </label>
+                        {{-- Radio Tidak Relevan --}}
+                        <label class="inline-flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-purple-300 bg-gray-50/50 cursor-pointer transition-all w-full text-xs font-medium text-gray-700">
+                            <span class="flex items-center gap-1.5 font-semibold text-rose-500">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                Tidak
+                            </span>
+                            <input type="radio" 
+                                   name="relevance[{{ $product->id }}]" 
+                                   value="0" 
+                                   class="ml-2 w-4 h-4 text-purple-600 focus:ring-purple-500 border-gray-300 cursor-pointer"
+                                   {{ $has_feedback ? (!($product->is_relevant ?? false) ? 'checked' : '') . ' disabled' : 'required' }}>
+                        </label>
+                    </div>
+                </div>
+
             </div>
             @endforeach
         </div>
 
+        @if(!$has_feedback)
+            <div class="mt-8 bg-white border border-purple-100 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-semibold text-gray-800">Evaluasi Hasil Rekomendasi</h3>
+                    <p class="text-xs text-gray-500 mt-1">Harap tentukan apakah setiap produk rekomendasi di atas Relevan atau Tidak Relevan sebelum men-submit.</p>
+                </div>
+                <button type="submit" class="w-full md:w-auto px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl transition duration-150 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                    <i class="fa fa-paper-plane"></i> Submit Evaluasi
+                </button>
+            </div>
+            </form>
+        @endif
+
         {{-- ================================================================== --}}
         {{-- EVALUASI REKOMENDASI - Precision@K, Recall@K, F1-Score             --}}
         {{-- ================================================================== --}}
-        @if(isset($evaluation))
-        <div class="mt-10 mb-6">
-            <div class="bg-gradient-to-br from-slate-50 to-purple-50 border border-purple-200 rounded-2xl overflow-hidden shadow-sm">
+        @if(isset($evaluation) && !$has_feedback)
+            <div class="mt-10 mb-6 bg-gradient-to-br from-purple-50/50 to-indigo-50/50 border border-dashed border-purple-200 rounded-2xl p-6 text-center shadow-sm">
+                <div class="w-12 h-12 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mx-auto mb-3 animate-pulse">
+                    <i class="fa fa-chart-line text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-gray-800 text-base">Metrik Evaluasi Sistem Rekomendasi</h3>
+                <p class="text-sm text-gray-500 mt-1 max-w-lg mx-auto leading-relaxed">
+                    Analisis akurasi rekomendasi (Precision@K, Recall@K, F1-Score) saat ini disembunyikan. 
+                    Silakan isi tanda relevansi pada tiap produk di atas dan klik <strong>Submit Evaluasi</strong> untuk menghitung metrik evaluasi berdasarkan penilaian nyata Anda.
+                </p>
+            </div>
+        @elseif(isset($evaluation) && $has_feedback)
+            <div class="mt-10 mb-6">
+                <div class="bg-gradient-to-br from-slate-50 to-purple-50 border border-purple-200 rounded-2xl overflow-hidden shadow-sm">
 
                 {{-- Header Evaluasi --}}
                 <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-4">
@@ -334,17 +409,7 @@
                         </div>
                     </div>
 
-                    {{-- Note --}}
-                    <div class="mt-4 flex items-start gap-2 text-xs text-gray-400">
-                        <svg class="w-4 h-4 flex-shrink-0 mt-0.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <p>
-                            Produk dianggap <strong class="text-gray-500">relevan</strong> jika memiliki similarity score ≥ {{ $evaluation['threshold'] * 100 }}%.
-                            Evaluasi dihitung berdasarkan metode <strong class="text-gray-500">Precision@K</strong>, <strong class="text-gray-500">Recall@K</strong>, dan <strong class="text-gray-500">F1-Score</strong>
-                            (Dwiyantoro, 2017).
-                        </p>
-                    </div>
+
                 </div>
             </div>
         </div>
