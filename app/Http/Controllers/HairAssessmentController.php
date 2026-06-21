@@ -36,8 +36,6 @@ class HairAssessmentController extends Controller
           
         ], [
             'hair_type.required'       => 'Silakan pilih tipe rambut Anda.',
-            'scalp_condition.required' => 'Silakan pilih minimal satu kondisi kulit kepala.',
-            'scalp_condition.min'      => 'Silakan pilih minimal satu kondisi kulit kepala.',
             'hair_problem.required'    => 'Silakan pilih minimal satu masalah rambut.',
             'hair_problem.min'         => 'Silakan pilih minimal satu masalah rambut.',
         
