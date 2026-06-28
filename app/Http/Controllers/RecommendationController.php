@@ -67,7 +67,7 @@ class RecommendationController extends Controller
         }
 
         // Ambil produk yang direkomendasikan saat ini agar bisa memvalidasi feedback yang masuk
-        $result = $this->service->recommendWithEvaluation($assessment, topN: 10, threshold: 0.6);
+        $result = $this->service->recommendWithEvaluation($assessment, topN: 10, threshold: 0.4);
         $recommendedProducts = $result['recommendations'];
 
         // Validasi input

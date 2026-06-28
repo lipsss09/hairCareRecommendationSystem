@@ -193,13 +193,15 @@ class RecommendationService
             $productIds = $feedbacks->pluck('product_id')->toArray();
             $feedbackMap = $feedbacks->pluck('is_relevant', 'product_id')->toArray();
             $scoreMap = $feedbacks->pluck('similarity_score', 'product_id')->toArray();
-
+            $allScoredMap = $allScored->keyBy('id');
             $recommendations = Products::with('category')
                 ->whereIn('id', $productIds)
                 ->get()
-                ->map(function ($product) use ($scoreMap, $feedbackMap) {
+                ->map(function ($product) use ($scoreMap, $feedbackMap,$allScoredMap) {
                     $product->similarity_score = (float) ($scoreMap[$product->id] ?? 0.0);
                     $product->is_relevant = (bool) ($feedbackMap[$product->id] ?? false);
+                    $product->matched_ingredients = isset($allScoredMap[$product->id]) 
+                    ? $allScoredMap[$product->id]->matched_ingredients : [];
                     return $product;
                 })
                 ->sortByDesc('similarity_score')
