@@ -21,7 +21,7 @@ class RecommendationController extends Controller
         // Pastikan assessment milik user yang sedang login
         abort_if($assessment->user_id !== auth()->id(), 403);
 
-        $result = $this->service->recommendWithEvaluation($assessment, topN: 10, threshold: 0.6);
+        $result = $this->service->recommendWithEvaluation($assessment, topN: 10, threshold: 0.4);
 
         return view('recommendations.show', [
             'assessment'      => $assessment->load(['hairProblems', 'scalpConditions']),
