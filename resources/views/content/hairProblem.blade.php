@@ -63,10 +63,9 @@
                             </div>
                             <p class="font-medium text-gray-900">Keriting</p>
                         </div>
-                    </label>
+                    </label> -->
                 </div>
-            </div> -->
-
+            </div>
             <!-- Scalp Condition Section (Checkbox - dari database) -->
             <!-- <div>
                 <h2 class="text-2xl font-semibold text-gray-900 mb-2">Bagaimana Kondisi Kulit Kepala Anda ?</h2>
