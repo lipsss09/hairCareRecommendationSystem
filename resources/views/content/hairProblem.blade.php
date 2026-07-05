@@ -30,7 +30,7 @@
                 <h2 class="text-2xl font-semibold text-gray-900 mb-6">Bagaimana Tipe Rambut Anda ?</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-1">
                     <!-- Bergelombang -->
-                    <label class="cursor-pointer w-64 h-64">
+                    <!-- <label class="cursor-pointer w-64 h-64">
                         <input type="radio" name="hair_type" value="bergelombang" class="peer hidden"
                             {{ old('hair_type') == 'bergelombang' ? 'checked' : '' }} >
                         <div class="border-2 border-gray-300 w-64 h-64 rounded-lg p-6 text-center transition-all hover:border-pink-400 peer-checked:border-pink-500 peer-checked:bg-pink-50">
@@ -39,7 +39,7 @@
                             </div>
                             <p class="font-medium text-gray-900">Bergelombang</p>
                         </div>
-                    </label>
+                    </label> -->
 
                     <!-- Lurus -->
                     <label class="cursor-pointer w-64 h-64">
@@ -53,7 +53,7 @@
                         </div>
                     </label>
 
-                    <!-- Keriting -->
+                    <!-- Keriting
                     <label class="cursor-pointer w-64 h-64">
                         <input type="radio" name="hair_type" value="keriting" class="peer hidden"
                             {{ old('hair_type') == 'keriting' ? 'checked' : '' }} >
@@ -65,7 +65,7 @@
                         </div>
                     </label>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Scalp Condition Section (Checkbox - dari database) -->
             <!-- <div>
